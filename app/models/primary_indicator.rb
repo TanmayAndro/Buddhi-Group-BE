@@ -1,0 +1,2 @@
+class PrimaryIndicator < ApplicationRecord
+end
