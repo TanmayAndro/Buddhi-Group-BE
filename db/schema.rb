@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_29_122837) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,24 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
     t.text "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "crimes", force: :cascade do |t|
+    t.string "crime_type"
+    t.string "department"
+    t.string "municipality"
+    t.string "dane_code"
+    t.string "weapons_types"
+    t.date "incident_date"
+    t.string "gender"
+    t.string "age_group"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "art_crime"
+    t.string "description_behaviour"
+    t.integer "municipality_code"
+    t.integer "department_code"
   end
 
   create_table "departamentos", force: :cascade do |t|
@@ -53,6 +71,28 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
     t.integer "certificate_availability"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "type_of_record"
+  end
+
+  create_table "fundamental_indicators", force: :cascade do |t|
+    t.integer "muncipality_code"
+    t.integer "department_code"
+    t.integer "total_dwellings"
+    t.integer "total_occupied_dwellings"
+    t.integer "total_house_holds"
+    t.integer "total_population"
+    t.integer "male_count"
+    t.integer "female_count"
+    t.integer "children_under_five"
+    t.integer "under_fifteen"
+    t.integer "over_fifteen"
+    t.integer "fifteen_to_twenty_nine"
+    t.integer "fifteen_to_sixty_four"
+    t.integer "over_sixty_four"
+    t.integer "women_with_child_wearing_age"
+    t.float "sex_ratio"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "hogares", force: :cascade do |t|
@@ -68,6 +108,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
     t.integer "people_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "type_of_record"
   end
 
   create_table "marco_de_georreferenciacions", force: :cascade do |t|
@@ -149,6 +190,44 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
     t.integer "birth_year"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "type_of_record"
+  end
+
+  create_table "primary_indicators", force: :cascade do |t|
+    t.integer "muncipality_code"
+    t.integer "department_code"
+    t.decimal "average_households"
+    t.json "percent_of_dwelling_type", default: {}
+    t.decimal "percent_of_water_supply_access"
+    t.decimal "percent_of_sewage_access"
+    t.decimal "percent_of_electricity_access"
+    t.decimal "percent_of_internet_access"
+    t.decimal "percent_of_gas_connected"
+    t.decimal "percent_of_waste_collection"
+    t.decimal "average_house_hold_size"
+    t.decimal "percent_of_house_holds"
+    t.decimal "percent_of_female_headship"
+    t.decimal "masculnity_ratio"
+    t.decimal "feminity_ratio"
+    t.decimal "demographic_dependency_ratio"
+    t.decimal "aging_index"
+    t.decimal "youth_index"
+    t.decimal "child_woman_ratio"
+    t.decimal "population_density"
+    t.json "distribution_in_geographic_areas", default: {}
+    t.json "population_distribution_by_ethnic_and_cultural", default: {}
+    t.json "population_by_place_of_birth", default: {}
+    t.decimal "literacy_rate_over_15"
+    t.decimal "school_attendance_rate"
+    t.decimal "person_with_difficulties"
+    t.decimal "economically_active_population"
+    t.decimal "umeployment_rate"
+    t.decimal "infant_mortality_rate"
+    t.decimal "fertility_rate"
+    t.decimal "life_expectancy_at_birth"
+    t.decimal "housing_tenure_status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "territorialidad_etnicas", force: :cascade do |t|
@@ -186,6 +265,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_08_122019) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "protected_area_code"
+    t.integer "type_of_record"
   end
 
   create_table "vivo_anos", force: :cascade do |t|
