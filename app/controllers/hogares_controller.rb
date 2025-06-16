@@ -16,6 +16,7 @@ class HogaresController < ApplicationController
 
       ActiveRecord::Base.transaction do
         CSV.foreach(csv_file, headers: true, encoding: 'bom|utf-8') do |row|
+          type_of_record = row['TIPO_REG']
           department_code = row['U_DPTO']
           muncipality_code = row['U_MPIO']
           unit_info = row['UA_CLASE']
@@ -28,6 +29,7 @@ class HogaresController < ApplicationController
           people_count = row['HA_TOT_PER'] 
 
           hogares << {
+            type_of_record: type_of_record,
             department_code: department_code,
             muncipality_code: muncipality_code,
             unit_info: unit_info,

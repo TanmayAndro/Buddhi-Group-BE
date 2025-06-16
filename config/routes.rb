@@ -7,9 +7,16 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  resources :crimes
   resources :municipios
+  resources :fundamental_indicators
+  resources :primary_indicators do
+    get 'fetch_stat', on: :collection
+  end
+  get 'vivienda_statistics/fetch_stat', to: 'vivienda_statistics#fetch_stat'
   post 'municipio/create_bulk_municipios', to: 'municipios#create_bulk_municipios'
 
+  post 'crimes/bulk_create', to: 'crimes#create_bulk_crimes'
   resources :territorialidad_etnicas
   post 'territorialidad_etnica/create_bulk_territorialidad_etnicas', to: 'territorialidad_etnicas#create_bulk_territorialidad_etnicas'
 
@@ -48,6 +55,7 @@ Rails.application.routes.draw do
 
   resources :personas
   post 'persona/create_bulk_personas', to: 'personas#create_bulk_personas'
+  get 'persona/export_municipality_data_batch', to: 'personas#export_municipality_data_batch'
 
 
 end

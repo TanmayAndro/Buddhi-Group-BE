@@ -16,6 +16,7 @@ class PersonasController < ApplicationController
 
       ActiveRecord::Base.transaction do
         CSV.foreach(csv_file, headers: true, encoding: 'bom|utf-8') do |row|
+          type_of_record = row['TIPO_REG']
           department_code = row['U_DPTO']
           muncipality_code = row['U_MPIO']
           unit_info = row['UA_CLASE']
@@ -63,6 +64,7 @@ class PersonasController < ApplicationController
           birth_year = row['PA2_ANO_UHNV']
 
           personas << {
+            type_of_record: type_of_record,
             department_code: department_code,
             muncipality_code: muncipality_code,
             unit_info: unit_info,
@@ -129,4 +131,48 @@ class PersonasController < ApplicationController
       render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
     end
   end
+  
+  def export_municipality_data_batch
+
+    batch_size = params[:batch_size].to_i > 0 ? params[:batch_size].to_i : 10
+    batch_number = params[:batch].to_i >= 0 ? params[:batch].to_i : 0
+  
+    unique_codes = Municipio.select(:department_code, :muncipality_code).distinct.order(:department_code, :muncipality_code)
+  
+    batch_codes = unique_codes.offset(batch_number * batch_size).limit(batch_size)
+  
+    age_groups = Persona.age_groups.keys
+  
+    csv_data = CSV.generate(headers: true) do |csv|
+      csv << ['City', 'Age Group', 'Total count', 'Male count', 'Female count']
+  
+      batch_codes.each do |code|
+        municipality_name = Municipio
+                              .where(department_code: code.department_code, muncipality_code: code.muncipality_code)
+                              .limit(1)
+                              .pluck(:muncipality)
+                              .first || 'Unknown'
+  
+        age_groups.each do |age_name|
+          age_value = Persona.age_groups[age_name]
+  
+          scope = Persona.where(
+            department_code: code.department_code,
+            muncipality_code: code.muncipality_code,
+            age_group: age_value
+          )
+  
+          total = scope.count
+          male = scope.where(gender: 1).count
+          female = scope.where(gender: 2).count
+  
+          csv << [municipality_name, age_name.humanize, total, male, female]
+        end
+      end
+    end
+  
+    send_data csv_data, filename: "municipality_age_group_counts_batch_#{batch_number}.csv"
+  end 
+  
+
 end
