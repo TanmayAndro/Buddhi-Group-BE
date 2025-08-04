@@ -1,0 +1,2 @@
+class CrimeKidnappingIncident < ApplicationRecord
+end

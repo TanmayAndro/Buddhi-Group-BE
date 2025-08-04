@@ -42,6 +42,9 @@ class ViviendasController < ApplicationController
           house_category = row['L_TIPO_INST']
           home_availability = row['L_EXISTEHOG']
           resident_number = row['L_TOT_PERL']
+          encuesta_code = row['COD_ENCUESTAS']
+          vivienda_code = row['U_VIVIENDA'].to_s.rjust(3, '0')
+          common_key = "#{encuesta_code}#{vivienda_code}"
 
 
           viviendas << {
@@ -71,6 +74,9 @@ class ViviendasController < ApplicationController
             house_category: house_category,
             home_availability: home_availability,
             resident_number: resident_number,
+            survey_code: encuesta_code,
+            housing_unit: vivienda_code,
+            common_key: common_key,
             created_at: Time.current,
             updated_at: Time.current
           }
@@ -78,13 +84,13 @@ class ViviendasController < ApplicationController
           row_count += 1
 
           if viviendas.size >= BATCH_SIZE
-            Vivienda.insert_all(viviendas)
+            NewVivienda.insert_all(viviendas)
             viviendas.clear
           end
         end
 
         # Insert remaining rows
-        Vivienda.insert_all(viviendas) if viviendas.any?
+        NewVivienda.insert_all(viviendas) if viviendas.any?
       end
 
       render json: { message: "Successfully imported #{row_count} viviendas" }, status: :ok

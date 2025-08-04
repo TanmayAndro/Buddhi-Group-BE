@@ -27,6 +27,9 @@ class HogaresController < ApplicationController
           water_source = row['H_AGUA_COCIN']
           death_2017 = row['HA_NRO_FALL']
           people_count = row['HA_TOT_PER'] 
+          encuesta_code = row['COD_ENCUESTAS']
+          vivienda_code = row['U_VIVIENDA'].to_s.rjust(3, '0')
+          common_key = "#{encuesta_code}#{vivienda_code}"
 
           hogares << {
             type_of_record: type_of_record,
@@ -41,19 +44,22 @@ class HogaresController < ApplicationController
             death_2017: death_2017,
             people_count: people_count,
             created_at: Time.current,
-            updated_at: Time.current
+            updated_at: Time.current,
+            survey_code: encuesta_code,
+            housing_unit: vivienda_code,
+            common_key: common_key
           }
 
           row_count += 1
 
           if hogares.size >= BATCH_SIZE
-            Hogare.insert_all(hogares)
+            NewHogare.insert_all(hogares)
             hogares.clear
           end
         end
 
         # Insert remaining rows
-        Hogare.insert_all(hogares) if hogares.any?
+        NewHogare.insert_all(hogares) if hogares.any?
       end
 
       render json: { message: "Successfully imported #{row_count} hogares" }, status: :ok

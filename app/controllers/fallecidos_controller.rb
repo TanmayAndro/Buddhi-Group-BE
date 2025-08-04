@@ -25,6 +25,9 @@ class FallecidosController < ApplicationController
           gender_indicator = row['FA2_SEXO_FALL']
           death_age = row['FA3_EDAD_FALL']
           certificate_availability = row['FA4_CERT_DEFUN']
+          encuesta_code = row['COD_ENCUESTAS']
+          vivienda_code = row['U_VIVIENDA'].to_s.rjust(3, '0')
+          common_key = "#{encuesta_code}#{vivienda_code}"
 
           fallecidos << {
             type_of_record: type_of_record,
@@ -37,19 +40,22 @@ class FallecidosController < ApplicationController
             death_age: death_age,
             certificate_availability: certificate_availability,
             created_at: Time.current,
-            updated_at: Time.current
+            updated_at: Time.current,
+            survey_code: encuesta_code,
+            housing_unit: vivienda_code,
+            common_key: common_key
           }
 
           row_count += 1
 
           if fallecidos.size >= BATCH_SIZE
-            Fallecido.insert_all(fallecidos)
+            NewFallecido.insert_all(fallecidos)
             fallecidos.clear
           end
         end
 
         # Insert remaining rows
-        Fallecido.insert_all(fallecidos) if fallecidos.any?
+        NewFallecido.insert_all(fallecidos) if fallecidos.any?
       end
 
       render json: { message: "Successfully imported #{row_count} fallecidos" }, status: :ok

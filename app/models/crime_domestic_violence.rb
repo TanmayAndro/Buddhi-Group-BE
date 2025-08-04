@@ -1,0 +1,2 @@
+class CrimeDomesticViolence < ApplicationRecord
+end

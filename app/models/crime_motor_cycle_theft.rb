@@ -1,0 +1,2 @@
+class CrimeMotorCycleTheft < ApplicationRecord
+end

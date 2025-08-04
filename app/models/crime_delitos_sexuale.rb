@@ -1,0 +1,2 @@
+class CrimeDelitosSexuale < ApplicationRecord
+end

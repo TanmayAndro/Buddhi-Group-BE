@@ -1,0 +1,2 @@
+class NewCrime < ApplicationRecord
+end

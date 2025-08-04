@@ -1,0 +1,2 @@
+class CrimeExtorsion < ApplicationRecord
+end

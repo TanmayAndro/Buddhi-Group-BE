@@ -1,0 +1,2 @@
+class CrimeTrafficAccidentInjury < ApplicationRecord
+end

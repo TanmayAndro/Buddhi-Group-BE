@@ -1,0 +1,2 @@
+class CrimeHomicide < ApplicationRecord
+end

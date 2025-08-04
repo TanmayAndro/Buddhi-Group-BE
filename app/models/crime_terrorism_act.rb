@@ -1,0 +1,2 @@
+class CrimeTerrorismAct < ApplicationRecord
+end

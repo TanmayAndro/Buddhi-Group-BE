@@ -1,0 +1,2 @@
+class CrimeFinancialInstitutionTheft < ApplicationRecord
+end

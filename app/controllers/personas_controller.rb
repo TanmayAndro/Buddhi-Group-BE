@@ -62,6 +62,9 @@ class PersonasController < ApplicationController
           birth_information = row['PA_UHNV']
           birth_month = row['PA1_MES_UHNV']
           birth_year = row['PA2_ANO_UHNV']
+          encuesta_code = row['COD_ENCUESTAS']
+          vivienda_code = row['U_VIVIENDA'].to_s.rjust(3, '0')
+          common_key = "#{encuesta_code}#{vivienda_code}"
 
           personas << {
             type_of_record: type_of_record,
@@ -111,19 +114,22 @@ class PersonasController < ApplicationController
             birth_month: birth_month,
             birth_year: birth_year,
             created_at: Time.current,
-            updated_at: Time.current
+            updated_at: Time.current,
+            survey_code: encuesta_code,
+            housing_unit: vivienda_code,
+            common_key: common_key,
           }
 
           row_count += 1
 
           if personas.size >= BATCH_SIZE
-            Persona.insert_all(personas)
+            NewPersona.insert_all(personas)
             personas.clear
           end
         end
 
         # Insert remaining rows
-        Persona.insert_all(personas) if personas.any?
+        NewPersona.insert_all(personas) if personas.any?
       end
 
       render json: { message: "Successfully imported #{row_count} personas" }, status: :ok

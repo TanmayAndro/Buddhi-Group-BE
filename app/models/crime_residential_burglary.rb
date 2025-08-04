@@ -1,0 +1,2 @@
+class CrimeResidentialBurglary < ApplicationRecord
+end
