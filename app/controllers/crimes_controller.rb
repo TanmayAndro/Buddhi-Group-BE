@@ -226,15 +226,27 @@ end
     end
 
 
-
   def fetch_new_crime_data
-    crimes = NewCrime.all
-    crimes = crimes.where(crime_type: params[:crime_type]) if params[:crime_type].present?
-    crimes = crimes.where(department: params[:department]) if params[:department].present?
+    crime_type = params[:crime_type]
+    year = params[:year].to_i
+    municipality_code = params[:municipality_code].to_i
+    department_code = params[:department_code].to_i
+
+    if crime_type.blank? || year.zero? || municipality_code.zero? || department_code.zero?
+      return render json: {
+        error: "Missing parameters. 'crime_type', 'year', 'municipality_code', and 'department_code' are required."
+      }, status: :bad_request
+    end
+
+    crimes = NewCrime.where(
+      crime_type: crime_type,
+      year: year,
+      municipality_code: municipality_code,
+      department_code: department_code
+    )
     crimes = crimes.where("municipality ILIKE ?", params[:municipality]) if params[:municipality].present?
     crimes = crimes.where(weapons_types: params[:weapons_types]) if params[:weapons_types].present?
     crimes = crimes.where(month: params[:month]) if params[:month].present?
-    crimes = crimes.where(year: params[:year]) if params[:year].present?
     crimes = crimes.where(gender: params[:gender]) if params[:gender].present?
     crimes = crimes.where(age_group: params[:age_group]) if params[:age_group].present?
     total_quantity = crimes.sum(:quantity)

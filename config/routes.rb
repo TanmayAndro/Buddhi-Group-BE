@@ -58,11 +58,11 @@ Rails.application.routes.draw do
   get 'persona/export_municipality_data_batch', to: 'personas#export_municipality_data_batch'
   post '/crime_formula/populate_crime_extorsions', to: 'crime_formula#populate_crime_extorsions'
   get '/fetch_crime_data', to: 'crimes#fetch_crime_data'
-  get '/fetch_new_crime_data', to: 'crimes#fetch_new_crime_data'
-  get '/crime_incidence_rate', to: 'crimes#crime_incidence_rate'
-  get '/crime_distribution_by_gender', to: 'crimes#crime_distribution_by_gender'
-  get '/crime_distribution_by_age_group', to: 'crimes#crime_distribution_by_age_group'
-  get '/crime_distribution_by_weapon', to: 'crimes#crime_distribution_by_weapon'
+  post '/fetch_new_crime_data', to: 'crimes#fetch_new_crime_data'
+  post '/crime_incidence_rate', to: 'crimes#crime_incidence_rate'
+  post '/crime_distribution_by_gender', to: 'crimes#crime_distribution_by_gender'
+  post '/crime_distribution_by_age_group', to: 'crimes#crime_distribution_by_age_group'
+  post '/crime_distribution_by_weapon', to: 'crimes#crime_distribution_by_weapon'
   post 'new_marco_de_georreferenciacion/create_bulk_marco_de_georreferenciacions', to: 'new_marco_de_georreferenciacions#create_bulk_marco_de_georreferenciacions'
 
 end
