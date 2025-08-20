@@ -288,7 +288,253 @@ end
 
     render json: result
   end
-  
+
+
+  def crime_type_by_gender
+    crime_type = params[:crime_type]
+    gender = params[:gender]
+
+    if crime_type.blank? || gender.blank?
+      return render json: { error: "crime_type and gender are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, gender: gender)
+
+    # Group by year
+    crimes_by_year = scope.group(:year).sum(:quantity)
+
+    # Group by month (for all years combined)
+    crimes_by_month = scope.group(:month).sum(:quantity)
+
+    # Group by department
+    crimes_by_department = scope.group(:department_code, :department).sum(:quantity).map do |(code, name), total|
+      { department_code: code, department: name, total: total }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      gender: gender,
+      by_year: crimes_by_year,
+      by_month: crimes_by_month,
+      by_department: crimes_by_department
+    }
+  end
+
+  def crime_type_by_age_group
+    crime_type = params[:crime_type]
+    age_group = params[:age_group]
+
+    if crime_type.blank? || age_group.blank?
+      return render json: { error: "crime_type and age_group are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, age_group: age_group)
+
+    # Group by year
+    crimes_by_year = scope.group(:year).sum(:quantity)
+
+    # Group by month (for all years combined)
+    crimes_by_month = scope.group(:month).sum(:quantity)
+
+    # Group by department
+    crimes_by_department = scope.group(:department_code, :department).sum(:quantity).map do |(code, name), total|
+      { department_code: code, department: name, total: total }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      age_group: age_group,
+      by_year: crimes_by_year,
+      by_month: crimes_by_month,
+      by_department: crimes_by_department
+    }
+  end
+
+  def crime_type_by_weapon
+    crime_type = params[:crime_type]
+    weapons_types = params[:weapons_types]
+
+    if crime_type.blank? || weapons_types.blank?
+      return render json: { error: "crime_type and weapons_types are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, weapons_types: weapons_types)
+
+    # Group by year
+    crimes_by_year = scope.group(:year).sum(:quantity)
+
+    # Group by month (for all years combined)
+    crimes_by_month = scope.group(:month).sum(:quantity)
+
+    # Group by department
+    crimes_by_department = scope.group(:department_code, :department).sum(:quantity).map do |(code, name), total|
+      { department_code: code, department: name, total: total }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      weapons_types: weapons_types,
+      by_year: crimes_by_year,
+      by_month: crimes_by_month,
+      by_department: crimes_by_department
+    }
+  end
+
+  def crime_type_by_year
+    crime_type = params[:crime_type]
+    year = params[:year]
+
+    if crime_type.blank? || year.blank?
+      return render json: { error: "crime_type and year are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, year: year)
+
+    # Group by gender (monthly breakdown)
+    crimes_by_gender = scope.group(:month, :gender).sum(:quantity).group_by { |(month, _), _| month }.map do |month, values|
+      {
+        month: month,
+        genders: values.map { |(_, gender), total| { gender: gender, total: total } }
+      }
+    end
+
+    # Group by age_group (monthly breakdown)
+    crimes_by_age = scope.group(:month, :age_group).sum(:quantity).group_by { |(month, _), _| month }.map do |month, values|
+      {
+        month: month,
+        age_groups: values.map { |(_, age), total| { age_group: age, total: total } }
+      }
+    end
+
+    # Group by department (monthly breakdown)
+    crimes_by_department = scope.group(:month, :department_code, :department).sum(:quantity).group_by { |(month, _, _), _| month }.map do |month, values|
+      {
+        month: month,
+        departments: values.map { |(_, code, name), total| { department_code: code, department: name, total: total } }
+      }
+    end
+
+    # Group by weapons_types (monthly breakdown)
+    crimes_by_weapons = scope.group(:month, :weapons_types).sum(:quantity).group_by { |(month, _), _| month }.map do |month, values|
+      {
+        month: month,
+        weapons: values.map { |(_, weapon), total| { weapons_types: weapon, total: total } }
+      }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      year: year,
+      by_gender: crimes_by_gender,
+      by_age_group: crimes_by_age,
+      by_department: crimes_by_department,
+      by_weapons: crimes_by_weapons
+    }
+  end
+
+  def crime_type_by_month
+    crime_type = params[:crime_type]
+    month = params[:month]
+
+    if crime_type.blank? || month.blank?
+      return render json: { error: "crime_type and month are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, month: month)
+
+    # Group by gender (per year breakdown)
+    crimes_by_gender = scope.group(:year, :gender).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        genders: values.map { |(_, gender), total| { gender: gender, total: total } }
+      }
+    end
+
+    # Group by age_group (per year breakdown)
+    crimes_by_age = scope.group(:year, :age_group).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        age_groups: values.map { |(_, age), total| { age_group: age, total: total } }
+      }
+    end
+
+    # Group by department (per year breakdown)
+    crimes_by_department = scope.group(:year, :department_code, :department).sum(:quantity).group_by { |(year, _, _), _| year }.map do |year, values|
+      {
+        year: year,
+        departments: values.map { |(_, code, name), total| { department_code: code, department: name, total: total } }
+      }
+    end
+
+    # Group by weapons_types (per year breakdown)
+    crimes_by_weapons = scope.group(:year, :weapons_types).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        weapons: values.map { |(_, weapon), total| { weapons_types: weapon, total: total } }
+      }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      month: month,
+      by_gender: crimes_by_gender,
+      by_age_group: crimes_by_age,
+      by_department: crimes_by_department,
+      by_weapons: crimes_by_weapons
+    }
+  end
+
+  def crime_type_by_department
+    crime_type = params[:crime_type]
+    department_code = params[:department_code]
+
+    if crime_type.blank? || department_code.blank?
+      return render json: { error: "crime_type and department_code are required" }, status: :bad_request
+    end
+
+    # Base scope
+    scope = NewCrime.where(crime_type: crime_type, department_code: department_code)
+
+    # Group by gender per year
+    crimes_by_gender = scope.group(:year, :gender).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        genders: values.map { |(_, gender), total| { gender: gender, total: total } }
+      }
+    end
+
+    # Group by age_group per year
+    crimes_by_age = scope.group(:year, :age_group).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        age_groups: values.map { |(_, age), total| { age_group: age, total: total } }
+      }
+    end
+
+    # Group by weapons_types per year
+    crimes_by_weapons = scope.group(:year, :weapons_types).sum(:quantity).group_by { |(year, _), _| year }.map do |year, values|
+      {
+        year: year,
+        weapons: values.map { |(_, weapon), total| { weapons_types: weapon, total: total } }
+      }
+    end
+
+
+    render json: {
+      crime_type: crime_type,
+      department_code: department_code,
+      by_gender: crimes_by_gender,
+      by_age_group: crimes_by_age,
+      by_weapons: crimes_by_weapons
+    }
+  end
+
+
   private
 
   def year_column(year)
