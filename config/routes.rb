@@ -76,13 +76,8 @@ Rails.application.routes.draw do
   post '/crime_distribution_by_weapon', to: 'crimes#crime_distribution_by_weapon'
 
   post 'new_marco_de_georreferenciacion/create_bulk_marco_de_georreferenciacions', to: 'new_marco_de_georreferenciacions#create_bulk_marco_de_georreferenciacions'
-  post '/crime_type_by_gender', to: 'crimes#crime_type_by_gender'
-  post '/crime_type_by_age_group', to: 'crimes#crime_type_by_age_group'
-  post '/crime_type_by_weapon', to: 'crimes#crime_type_by_weapon'
-  post '/crime_type_by_year', to: 'crimes#crime_type_by_year'
-  post '/crime_type_by_month', to: 'crimes#crime_type_by_month'
-  post '/crime_type_by_department', to: 'crimes#crime_type_by_department'
 
 
+post '/crime_type_stats', to: 'crimes#crime_type_stats'
 
 end
