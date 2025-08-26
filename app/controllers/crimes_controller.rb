@@ -333,54 +333,64 @@ end
     end
 
     if filter_type == "year"
-    crimes_by_gender = scope.group(:year, :month, :gender).sum(:quantity)
-      .group_by { |(year, month, _), _| [year, month] }
-      .map do |(year, month), values|
+      yearly_gender_totals = scope.group(:year, :gender).sum(:quantity)
+      .group_by { |(year, _), _| year }
+      .map do |year, values|
+        genders_data = values.map { |(_, gender), total| { gender: gender, total: total } }
+        total_count = genders_data.sum { |g| g[:total] }
         {
           year: year,
-          month: month,
-          genders: values.map { |(_, _, gender), total| { gender: gender, total: total } }
+          total: total_count, 
+          genders: genders_data
         }
       end
 
     crimes_by_age = scope.group(:year, :month, :age_group).sum(:quantity)
       .group_by { |(year, month, _), _| [year, month] }
       .map do |(year, month), values|
+        age_groups_data = values.map { |(_, _, age), total| { age_group: age, total: total } }
+        total_count = age_groups_data.sum { |a| a[:total] }
         {
           year: year,
-          month: month,
-          age_groups: values.map { |(_, _, age), total| { age_group: age, total: total } }
+          total: total_count, 
+          age_groups: age_groups_data
         }
       end
 
-    crimes_by_department = scope.group(:year, :month, :department).sum(:quantity)
+      crimes_by_department = scope.group(:year, :month, :department).sum(:quantity)
       .group_by { |(year, month, _), _| [year, month] }
       .map do |(year, month), values|
+        departments_data = values.map { |(_, _, dept), total| { department: dept, total: total } }
+        total_count = departments_data.sum { |d| d[:total] }
         {
           year: year,
-          month: month,
-          departments: values.map { |(_, _, dept), total| { department: dept, total: total } }
+          total: total_count, 
+          departments: departments_data
         }
       end
 
-    crimes_by_weapons = scope.group(:year, :month, :weapons_types).sum(:quantity)
-      .group_by { |(year, month, _), _| [year, month] }
-      .map do |(year, month), values|
+      # Monthly breakdown by weapons
+     crimes_by_weapons = scope.group(:year, :weapons_types).sum(:quantity)
+      .group_by { |(year, _), _| year }
+      .map do |year, values|
+        weapons_data = values.map { |(_, weapon), total| { weapons_types: weapon, total: total } }
+        total_count = weapons_data.sum { |w| w[:total] }
         {
           year: year,
-          month: month,
-          weapons: values.map { |(_, _, weapon), total| { weapons_types: weapon, total: total } }
+          total: total_count, 
+          weapons: weapons_data
         }
-      end
+     end
 
-    return render json: {
-      crime_type: crime_type,
-      filter_type: "year",
-      by_gender: crimes_by_gender,
-      by_age_group: crimes_by_age,
-      by_department: crimes_by_department,
-      by_weapons: crimes_by_weapons
-    }
+      return render json: {
+        crime_type: crime_type,
+        filter_type: "year",
+        yearly_gender_totals: yearly_gender_totals,
+        # by_gender: crimes_by_gender,
+        by_age_group: crimes_by_age,
+        by_department: crimes_by_department,
+        by_weapons: crimes_by_weapons
+      }
     end
 
 
