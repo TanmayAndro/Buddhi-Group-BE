@@ -78,6 +78,11 @@ Rails.application.routes.draw do
   post 'new_marco_de_georreferenciacion/create_bulk_marco_de_georreferenciacions', to: 'new_marco_de_georreferenciacions#create_bulk_marco_de_georreferenciacions'
 
 
-post '/crime_type_stats', to: 'crimes#crime_type_stats'
+  post '/crime_type_stats', to: 'crimes#crime_type_stats'
+  post '/crime_type_by_years', to: 'crimes#crime_type_by_years'
+  post '/crime_type_by_department', to: 'crimes#crime_type_by_department'
+  post '/crime_type_by_months', to: 'crimes#crime_type_by_months'
+  post '/crime_type_by_municipalities', to: 'crimes#crime_type_by_municipalities'
+
 
 end

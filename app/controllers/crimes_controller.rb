@@ -457,6 +457,223 @@ end
   end
 
 
+  def crime_type_by_years
+    crime_type = params[:crime_type]
+    variable   = params[:variable]
+
+    if crime_type.blank? || variable.blank?
+      return render json: { error: "crime_type and variable are required" }, status: :bad_request
+    end
+
+    unless %w[gender age_group weapons_types].include?(variable)
+      return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
+    end
+
+    # Filter scope
+    scope = NewCrime.where(crime_type: crime_type)
+
+    # Group by year + variable
+    results = scope.group(:year, variable).sum(:quantity)
+      .group_by { |(year, _), _| year }
+      .map do |year, values|
+        breakdown = values.map do |(_, var), total|
+          { variable => var, total: total }
+        end
+
+        total_count = breakdown.sum { |d| d[:total] }
+
+        {
+          year: year,
+          total: total_count,
+          breakdown: breakdown
+        }
+      end
+
+    # Fill in missing years (2010–2025) with zeros
+    full_results = (2010..2025).map do |year|
+      found = results.find { |r| r[:year] == year }
+      found || { year: year, total: 0, breakdown: [] }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      variable: variable,
+      data: full_results
+    }
+  end
+
+
+  def crime_type_by_department
+    crime_type = params[:crime_type]
+    variable   = params[:variable]
+
+    if crime_type.blank? || variable.blank?
+      return render json: { error: "crime_type and variable are required" }, status: :bad_request
+    end
+
+    unless %w[gender age_group weapons_types].include?(variable)
+      return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
+    end
+
+    scope = NewCrime.where(crime_type: crime_type)
+
+    results = scope.group(:department, variable).sum(:quantity)
+      .group_by { |(dept, _), _| dept }
+      .map do |dept, values|
+        breakdown = values.map do |(_, var), total|
+          { variable => var, total: total }
+        end
+
+        total_count = breakdown.sum { |d| d[:total] }
+
+        department_code = NewCrime.where(department: dept).limit(1).pick(:department_code)
+
+        {
+          department: dept,
+          department_code: department_code,
+          total: total_count,
+          breakdown: breakdown
+        }
+      end
+
+    render json: {
+      crime_type: crime_type,
+      variable: variable,
+      data: results
+    } 
+  end
+
+  def crime_type_by_months
+    crime_type = params[:crime_type]
+    variable   = params[:variable]
+    year       = params[:year].to_i
+
+    if crime_type.blank? || variable.blank? || year.zero?
+      return render json: { error: "crime_type, variable, and year are required" }, status: :bad_request
+    end
+
+    unless %w[gender age_group weapons_types].include?(variable)
+      return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
+    end
+
+    scope = NewCrime.where(crime_type: crime_type, year: year)
+
+    # Group by month + variable
+    results = scope.group(:month, variable).sum(:quantity)
+      .group_by { |(month, _), _| month }
+      .map do |month, values|
+        breakdown = values.map do |(_, var), total|
+          { variable => var, total: total }
+        end
+
+        total_count = breakdown.sum { |d| d[:total] }
+
+        {
+          month: month,
+          total: total_count,
+          breakdown: breakdown
+        }
+      end
+
+    # Fill months 1–12 (ensure all months present)
+    full_results = (1..12).map do |m|
+      found = results.find { |r| r[:month] == m }
+      found || { month: m, total: 0, breakdown: [] }
+    end
+
+    render json: {
+      crime_type: crime_type,
+      variable: variable,
+      year: year,
+      data: full_results
+    }
+  end
+
+
+  # def crime_type_by_municipalities
+  #   crime_type      = params[:crime_type]
+  #   variable        = params[:variable]
+  #   department_code = params[:department_code]
+
+  #   if crime_type.blank? || variable.blank? || department_code.blank?
+  #     return render json: { error: "crime_type, variable, and department_code are required" }, status: :bad_request
+  #   end
+
+  #   unless %w[gender age_group weapons_types].include?(variable)
+  #     return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
+  #   end
+
+  #   # Filter scope for the given crime_type + department
+  #   scope = NewCrime.where(crime_type: crime_type, department_code: department_code)
+
+  #   # Group by municipality + variable
+  #   results = scope.group(:municipality, variable).sum(:quantity)
+  #     .group_by { |(mun, _), _| mun }
+  #     .map do |mun, values|
+  #       breakdown = values.map do |(_, var), total|
+  #         { variable => var, total: total }
+  #       end
+
+  #       total_count = breakdown.sum { |d| d[:total] }
+
+  #       {
+  #         municipality: mun,
+  #         total: total_count,
+  #         breakdown: breakdown
+  #       }
+  #     end
+
+  #   render json: {
+  #     crime_type: crime_type,
+  #     variable: variable,
+  #     department_code: department_code,
+  #     data: results
+  #   }
+  # end
+
+  def crime_type_by_municipalities
+    crime_type      = params[:crime_type]
+    variable        = params[:variable]
+    department_code = params[:department_code]
+
+    if crime_type.blank? || variable.blank? || department_code.blank?
+      return render json: { error: "crime_type, variable, and department_code are required" }, status: :bad_request
+    end
+
+    unless %w[gender age_group weapons_types].include?(variable)
+      return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
+    end
+
+    # Filter scope for the given crime_type + department
+    scope = NewCrime.where(crime_type: crime_type, department_code: department_code)
+
+    # Group by municipality + variable
+    results = scope.group(:municipality, :municipality_code, variable).sum(:quantity)
+      .group_by { |(mun, _, _), _| mun }
+      .map do |mun, values|
+        breakdown = values.map do |(_, _, var), total|
+          { variable => var, total: total }
+        end
+
+        total_count = breakdown.sum { |d| d[:total] }
+        municipality_code = values.first[0][1] # pick municipality_code from grouped keys
+
+        {
+          municipality: mun,
+          municipality_code: municipality_code,
+          total: total_count,
+          breakdown: breakdown
+        }
+      end
+
+    render json: {
+      crime_type: crime_type,
+      variable: variable,
+      department_code: department_code,
+      data: results
+    }
+  end
+
 
   private
 
