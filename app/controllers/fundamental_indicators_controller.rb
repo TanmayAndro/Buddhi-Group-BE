@@ -5,7 +5,7 @@ class FundamentalIndicatorsController < ApplicationController
   end
 	
 
-  def rural_sections_data
+  def fetch_fundamental_indicator_data
     department_code        = params[:department_code]
     muncipality_code       = params[:muncipality_code]
     unit_info              = params[:class_code]
