@@ -1,0 +1,2 @@
+class UniqueGeorreferenciacion < ApplicationRecord
+end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_29_091734) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,6 +19,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.text "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "blocks", force: :cascade do |t|
+    t.string "name"
+    t.bigint "urban_section_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["urban_section_id"], name: "index_blocks_on_urban_section_id"
   end
 
   create_table "crime_commercial_thefts", force: :cascade do |t|
@@ -338,6 +346,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "departments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "department_id"
+  end
+
   create_table "edad_falls", force: :cascade do |t|
     t.integer "value"
     t.string "category"
@@ -367,24 +381,39 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
   end
 
   create_table "fundamental_indicators", force: :cascade do |t|
-    t.integer "muncipality_code"
-    t.integer "department_code"
-    t.integer "total_dwellings"
-    t.integer "total_occupied_dwellings"
-    t.integer "total_house_holds"
-    t.integer "total_population"
+    t.integer "dwelling_count"
+    t.integer "house_hold_count"
+    t.integer "total_person"
     t.integer "male_count"
     t.integer "female_count"
-    t.integer "children_under_five"
-    t.integer "under_fifteen"
-    t.integer "over_fifteen"
-    t.integer "fifteen_to_twenty_nine"
-    t.integer "fifteen_to_sixty_four"
-    t.integer "over_sixty_four"
-    t.integer "women_with_child_wearing_age"
-    t.float "sex_ratio"
+    t.integer "children_count"
+    t.integer "adult_count"
+    t.integer "senior_citizen_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "urban_population_count"
+    t.integer "adult_literacy_count"
+    t.integer "school_attendance_count"
+    t.integer "total_population_for_schooling"
+    t.jsonb "school_population"
+    t.integer "employment_count"
+    t.integer "unemployment_count"
+    t.integer "total_population_for_work"
+    t.integer "working_age_count"
+    t.integer "senitation_house_count"
+    t.integer "electricity_house_count"
+    t.integer "house_holds_with_internet"
+    t.jsonb "ethnic_group_population"
+    t.integer "live_births_count"
+    t.integer "reproductivity_women_no"
+    t.integer "number_of_infant_deaths"
+    t.bigint "urban_section_id"
+    t.string "block_code"
+    t.string "dane_code"
+    t.bigint "new_marco_de_georreferenciacion_id"
+    t.index ["dane_code"], name: "index_fundamental_indicators_on_dane_code", unique: true
+    t.index ["new_marco_de_georreferenciacion_id"], name: "idx_on_new_marco_de_georreferenciacion_id_adadd3535b"
+    t.index ["urban_section_id"], name: "index_fundamental_indicators_on_urban_section_id"
   end
 
   create_table "hogares", force: :cascade do |t|
@@ -409,6 +438,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.integer "unit_info"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "municipalities", force: :cascade do |t|
+    t.bigint "department_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "municipality_id"
+    t.integer "department_code"
+    t.index ["department_id"], name: "index_municipalities_on_department_id"
   end
 
   create_table "municipios", force: :cascade do |t|
@@ -490,6 +528,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.string "urban_section"
     t.string "block"
     t.string "dane_code_anm"
+    t.index ["block"], name: "index_new_hogares_on_block"
     t.index ["common_key"], name: "index_new_hogares_on_common_key"
   end
 
@@ -571,6 +610,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.string "urban_section"
     t.string "block"
     t.string "dane_code_anm"
+    t.index ["block", "activity_status"], name: "index_new_personas_on_block_and_activity_status"
+    t.index ["block", "age_group"], name: "index_new_personas_on_block_and_age_group"
+    t.index ["block", "child_birth"], name: "index_new_personas_on_block_and_child_birth"
+    t.index ["block", "ethnicicity_status"], name: "index_new_personas_on_block_and_ethnicicity_status"
+    t.index ["block", "gender"], name: "index_new_personas_on_block_and_gender"
+    t.index ["block", "literacy_rate"], name: "index_new_personas_on_block_and_literacy_rate"
+    t.index ["block", "school_presence"], name: "index_new_personas_on_block_and_school_presence"
+    t.index ["block"], name: "index_new_personas_on_block"
     t.index ["common_key"], name: "index_new_personas_on_common_key"
   end
 
@@ -613,6 +660,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.string "urban_section"
     t.string "block"
     t.string "dane_code_anm"
+    t.index ["block", "electricity_availability"], name: "index_new_viviendas_on_block_and_electricity_availability"
+    t.index ["block", "internet_availability"], name: "index_new_viviendas_on_block_and_internet_availability"
+    t.index ["block", "sanitory_quality"], name: "index_new_viviendas_on_block_and_sanitory_quality"
+    t.index ["block"], name: "index_new_viviendas_on_block"
     t.index ["common_key"], name: "index_new_viviendas_on_common_key"
   end
 
@@ -681,10 +732,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.integer "type_of_record"
   end
 
+  create_table "populated_centers", force: :cascade do |t|
+    t.bigint "rural_section_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "populated_center_code"
+    t.index ["rural_section_id"], name: "index_populated_centers_on_rural_section_id"
+  end
+
   create_table "primary_indicators", force: :cascade do |t|
     t.integer "muncipality_code"
     t.integer "department_code"
-    t.decimal "average_households"
+    t.decimal "average_household_size"
     t.json "percent_of_dwelling_type", default: {}
     t.decimal "percent_of_water_supply_access"
     t.decimal "percent_of_sewage_access"
@@ -709,13 +768,41 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.decimal "school_attendance_rate"
     t.decimal "person_with_difficulties"
     t.decimal "economically_active_population"
-    t.decimal "umeployment_rate"
+    t.decimal "unemployment_rate"
     t.decimal "infant_mortality_rate"
     t.decimal "fertility_rate"
     t.decimal "life_expectancy_at_birth"
     t.decimal "housing_tenure_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "sex_ratio"
+    t.decimal "age_dependency_ratio"
+    t.decimal "urbanization_rate"
+    t.jsonb "ethnic_composition", default: {}
+    t.decimal "migration_rate"
+    t.decimal "gross_enrollment_ratio"
+    t.decimal "employment_to_population_ratio"
+    t.decimal "female_headship_rate"
+    t.decimal "access_to_improved_water_source"
+    t.decimal "access_to_improved_sanitation_rate"
+    t.decimal "electricity_access_rate"
+    t.decimal "internet_access_rate"
+  end
+
+  create_table "rural_sections", force: :cascade do |t|
+    t.bigint "rural_sector_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "rural_section_code"
+    t.index ["rural_sector_id"], name: "index_rural_sections_on_rural_sector_id"
+  end
+
+  create_table "rural_sectors", force: :cascade do |t|
+    t.bigint "ua_class_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "rural_sector_code"
+    t.index ["ua_class_id"], name: "index_rural_sectors_on_ua_class_id"
   end
 
   create_table "temporary_crimes", force: :cascade do |t|
@@ -739,6 +826,46 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.text "category"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "ua_classes", force: :cascade do |t|
+    t.bigint "municipality_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "unit_info"
+    t.index ["municipality_id"], name: "index_ua_classes_on_municipality_id"
+  end
+
+  create_table "unique_georreferenciacions", force: :cascade do |t|
+    t.integer "department_code"
+    t.integer "muncipality_code"
+    t.integer "unit_info"
+    t.string "rural_sector"
+    t.string "rural_section"
+    t.string "populated_center"
+    t.string "urban_sector"
+    t.string "urban_section"
+    t.string "block"
+    t.string "dane_code_anm"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dane_code_anm"], name: "index_unique_georreferenciacions_on_dane_code_anm", unique: true
+  end
+
+  create_table "urban_sections", force: :cascade do |t|
+    t.bigint "urban_sector_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "urban_section_code"
+    t.index ["urban_sector_id"], name: "index_urban_sections_on_urban_sector_id"
+  end
+
+  create_table "urban_sectors", force: :cascade do |t|
+    t.bigint "populated_center_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "urban_sector_code"
+    t.index ["populated_center_id"], name: "index_urban_sectors_on_populated_center_id"
   end
 
   create_table "viviendas", force: :cascade do |t|
@@ -779,4 +906,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_01_123411) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "blocks", "urban_sections"
+  add_foreign_key "fundamental_indicators", "new_marco_de_georreferenciacions"
+  add_foreign_key "fundamental_indicators", "urban_sections"
+  add_foreign_key "municipalities", "departments"
+  add_foreign_key "populated_centers", "rural_sections"
+  add_foreign_key "rural_sections", "rural_sectors"
+  add_foreign_key "rural_sectors", "ua_classes"
+  add_foreign_key "ua_classes", "municipalities"
+  add_foreign_key "urban_sections", "urban_sectors"
+  add_foreign_key "urban_sectors", "populated_centers"
 end

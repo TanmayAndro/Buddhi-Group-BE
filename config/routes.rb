@@ -17,6 +17,7 @@ Rails.application.routes.draw do
       post :calculate_and_insert_data
       post :calculate_all
       post :fetch_fundamental_indicator_data
+      post :fetch_fundamental_indicator_data_fast
     end
   end
 
