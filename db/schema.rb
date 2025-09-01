@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_29_091734) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -407,13 +407,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_29_091734) do
     t.integer "live_births_count"
     t.integer "reproductivity_women_no"
     t.integer "number_of_infant_deaths"
-    t.bigint "urban_section_id"
     t.string "block_code"
     t.string "dane_code"
     t.bigint "new_marco_de_georreferenciacion_id"
     t.index ["dane_code"], name: "index_fundamental_indicators_on_dane_code", unique: true
     t.index ["new_marco_de_georreferenciacion_id"], name: "idx_on_new_marco_de_georreferenciacion_id_adadd3535b"
-    t.index ["urban_section_id"], name: "index_fundamental_indicators_on_urban_section_id"
   end
 
   create_table "hogares", force: :cascade do |t|
@@ -908,7 +906,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_29_091734) do
 
   add_foreign_key "blocks", "urban_sections"
   add_foreign_key "fundamental_indicators", "new_marco_de_georreferenciacions"
-  add_foreign_key "fundamental_indicators", "urban_sections"
   add_foreign_key "municipalities", "departments"
   add_foreign_key "populated_centers", "rural_sections"
   add_foreign_key "rural_sections", "rural_sectors"
