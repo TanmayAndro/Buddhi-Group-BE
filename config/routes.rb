@@ -18,11 +18,15 @@ Rails.application.routes.draw do
       post :calculate_all
       post :fetch_fundamental_indicator_data
       post :fetch_fundamental_indicator_data_fast
+      post :fetch_fundamental_indicator_data_fast_sql
     end
   end
 
   resources :primary_indicators do
-    get 'fetch_stat', on: :collection
+    collection do
+      get :fetch_stat
+      post :calculate_all
+    end
   end
 
   get 'vivienda_statistics/fetch_stat', to: 'vivienda_statistics#fetch_stat'
