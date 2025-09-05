@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_04_072856) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -409,9 +409,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
     t.integer "number_of_infant_deaths"
     t.string "block_code"
     t.string "dane_code"
-    t.bigint "new_marco_de_georreferenciacion_id"
     t.index ["dane_code"], name: "index_fundamental_indicators_on_dane_code", unique: true
-    t.index ["new_marco_de_georreferenciacion_id"], name: "idx_on_new_marco_de_georreferenciacion_id_adadd3535b"
   end
 
   create_table "hogares", force: :cascade do |t|
@@ -739,38 +737,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
   end
 
   create_table "primary_indicators", force: :cascade do |t|
-    t.integer "muncipality_code"
-    t.integer "department_code"
     t.decimal "average_household_size"
-    t.json "percent_of_dwelling_type", default: {}
-    t.decimal "percent_of_water_supply_access"
-    t.decimal "percent_of_sewage_access"
-    t.decimal "percent_of_electricity_access"
-    t.decimal "percent_of_internet_access"
-    t.decimal "percent_of_gas_connected"
-    t.decimal "percent_of_waste_collection"
-    t.decimal "average_house_hold_size"
-    t.decimal "percent_of_house_holds"
-    t.decimal "percent_of_female_headship"
-    t.decimal "masculnity_ratio"
-    t.decimal "feminity_ratio"
-    t.decimal "demographic_dependency_ratio"
-    t.decimal "aging_index"
-    t.decimal "youth_index"
-    t.decimal "child_woman_ratio"
-    t.decimal "population_density"
-    t.json "distribution_in_geographic_areas", default: {}
-    t.json "population_distribution_by_ethnic_and_cultural", default: {}
-    t.json "population_by_place_of_birth", default: {}
     t.decimal "literacy_rate_over_15"
-    t.decimal "school_attendance_rate"
-    t.decimal "person_with_difficulties"
-    t.decimal "economically_active_population"
     t.decimal "unemployment_rate"
     t.decimal "infant_mortality_rate"
     t.decimal "fertility_rate"
-    t.decimal "life_expectancy_at_birth"
-    t.decimal "housing_tenure_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.decimal "sex_ratio"
@@ -780,11 +751,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
     t.decimal "migration_rate"
     t.decimal "gross_enrollment_ratio"
     t.decimal "employment_to_population_ratio"
-    t.decimal "female_headship_rate"
     t.decimal "access_to_improved_water_source"
     t.decimal "access_to_improved_sanitation_rate"
     t.decimal "electricity_access_rate"
     t.decimal "internet_access_rate"
+    t.string "block_code"
+    t.string "dane_code"
+    t.index ["dane_code"], name: "index_primary_indicators_on_dane_code", unique: true
   end
 
   create_table "rural_sections", force: :cascade do |t|
@@ -905,7 +878,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_01_055437) do
   end
 
   add_foreign_key "blocks", "urban_sections"
-  add_foreign_key "fundamental_indicators", "new_marco_de_georreferenciacions"
   add_foreign_key "municipalities", "departments"
   add_foreign_key "populated_centers", "rural_sections"
   add_foreign_key "rural_sections", "rural_sectors"

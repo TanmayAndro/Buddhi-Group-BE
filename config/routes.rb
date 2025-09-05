@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       post :fetch_fundamental_indicator_data
       post :fetch_fundamental_indicator_data_fast
       post :fetch_fundamental_indicator_data_fast_sql
+      post :bulk_update_fertility_and_urbanization
     end
   end
 
@@ -26,6 +27,7 @@ Rails.application.routes.draw do
     collection do
       get :fetch_stat
       post :calculate_all
+      post :fetch_primary_indicator_data_fast_sql
     end
   end
 
