@@ -160,7 +160,7 @@ def fetch_fundamental_indicator_data_fast_sql
 
   group_field =
     if urban_section_code.present?
-      :urban_section
+      :block
     elsif urban_sector_code.present?
       :urban_section
     elsif populated_center_code.present?
@@ -195,8 +195,11 @@ def fetch_fundamental_indicator_data_fast_sql
   results = query.group("unique_georreferenciacions.#{group_field}")
                  .sum("fundamental_indicators.#{column_name}")
 
-  render json: { results: results.map { |g, total| { group_field => g, total: total } } }
+  render json: {
+    results: results.map { |g, total| { group_field => g, total: total } }
+  }
 end
+
 
 
 
