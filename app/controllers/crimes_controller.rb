@@ -1,229 +1,228 @@
 class CrimesController < ApplicationController
   
-  def create_bulk_crimes
-  if params[:file].nil?
-    render json: { error: 'No file uploaded' }, status: :bad_request
-    return
+ def create_bulk_crimes
+    if params[:file].nil?
+      render json: { error: 'No file uploaded' }, status: :bad_request
+      return
+    end
+
+    begin
+      xls_file = params[:file].tempfile
+      spreadsheet = Roo::Spreadsheet.open(xls_file)
+      sheet = spreadsheet.sheet(0)
+
+      records = []
+
+      sheet.each_with_index do |row, index|
+        next if index == 0 || row.compact.empty?
+
+        department   = row[1].to_s.strip
+        municipality = row[2].to_s.strip
+
+        # Skip rows where department or municipality is missing
+        next if department.blank? || municipality.blank?
+
+        # Normalize weapons_types
+        weapons_types = begin
+          str = row[4].to_s.strip.upcase
+          (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
+        end
+
+        # Normalize gender
+        gender = begin
+          str = row[6].to_s.strip.upcase
+          (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
+        end
+
+        # Normalize age_group
+        age_group = begin
+          str = row[7].to_s.gsub('*', '').strip.upcase
+          (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
+        end
+
+        # Default quantity to 0 if nil or blank
+        quantity = row[8].to_i rescue 0
+
+        records << {
+          crime_type:     row[0].to_s.strip,     # DELITO
+          department:     department,            # DEPARTAMENTO
+          municipality:   municipality,          # MUNICIPIO
+          dane_code:      row[3].to_s.strip,     # CODIGO DANE
+          weapons_types:  weapons_types,         # ARMAS MEDIOS
+          incident_date:  row[5],                # FECHA HECHO
+          gender:         gender,                # GENERO
+          age_group:      age_group,             # AGRUPA EDAD PERSONA
+          quantity:       quantity               # CANTIDAD
+        }
+
+        if records.size >= 1000
+          NewCrime.insert_all(records)
+          records.clear
+        end
+      end
+
+      NewCrime.insert_all(records) if records.any?
+
+      render json: { message: 'Crimes uploaded successfully in bulk' }, status: :ok
+    rescue => e
+      render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
+    end
   end
 
-  begin
-    xls_file = params[:file].tempfile
-    spreadsheet = Roo::Spreadsheet.open(xls_file)
-    sheet = spreadsheet.sheet(0)
+  def crime_incidence_rate
+    crime_type = params[:crime_type]
+    year = params[:year].to_i
+    municipality_code = params[:municipality_code].to_i
+    department_code = params[:department_code].to_i
 
-    records = []
-
-    sheet.each_with_index do |row, index|
-      next if index == 0 || row.compact.empty?
-
-      department   = row[1].to_s.strip
-      municipality = row[2].to_s.strip
-
-      # Skip rows where department or municipality is missing
-      next if department.blank? || municipality.blank?
-
-      # Normalize weapons_types
-      weapons_types = begin
-        str = row[4].to_s.strip.upcase
-        (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
-      end
-
-      # Normalize gender
-      gender = begin
-        str = row[6].to_s.strip.upcase
-        (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
-      end
-
-      # Normalize age_group
-      age_group = begin
-        str = row[7].to_s.gsub('*', '').strip.upcase
-        (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
-      end
-
-      # Default quantity to 0 if nil or blank
-      quantity = row[8].to_i rescue 0
-
-      records << {
-        crime_type:     row[0].to_s.strip,     # DELITO
-        department:     department,            # DEPARTAMENTO
-        municipality:   municipality,          # MUNICIPIO
-        dane_code:      row[3].to_s.strip,     # CODIGO DANE
-        weapons_types:  weapons_types,         # ARMAS MEDIOS
-        incident_date:  row[5],                # FECHA HECHO
-        gender:         gender,                # GENERO
-        age_group:      age_group,             # AGRUPA EDAD PERSONA
-        quantity:       quantity               # CANTIDAD
-      }
-
-      if records.size >= 1000
-        NewCrime.insert_all(records)
-        records.clear
-      end
+    if crime_type.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
+      return render json: { error: "Missing parameters" }, status: :bad_request
     end
+    total_crimes = NewCrime.where(crime_type: crime_type, municipality_code: municipality_code, department_code: department_code,  year: year).sum(:quantity)
+    total_population = Persona.where(muncipality_code: municipality_code, department_code: department_code).count
 
-    NewCrime.insert_all(records) if records.any?
+    return render json: { error: "No population data found" }, status: :not_found if total_population.zero?
 
-    render json: { message: 'Crimes uploaded successfully in bulk' }, status: :ok
-  rescue => e
-    render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
+    rate_per_100k = (total_crimes.to_f / total_population) * 100_000
+
+    render json: {
+      crime_type: crime_type,
+      year: year,
+      total_crimes: total_crimes,
+      total_population: total_population,
+      incidence_rate_per_100k: rate_per_100k.round(2)
+    }
   end
-end
 
-
-    def crime_incidence_rate
-      crime_type = params[:crime_type]
-      year = params[:year].to_i
+  def crime_distribution_by_gender
+    crime_type = params[:crime_type]
+    gender = params[:gender]
+    year = params[:year].to_i
       municipality_code = params[:municipality_code].to_i
-      department_code = params[:department_code].to_i
+    department_code = params[:department_code].to_i
 
-      if crime_type.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
-        return render json: { error: "Missing parameters" }, status: :bad_request
-      end
-      total_crimes = NewCrime.where(crime_type: crime_type, municipality_code: municipality_code, department_code: department_code,  year: year).sum(:quantity)
-      total_population = Persona.where(muncipality_code: municipality_code, department_code: department_code).count
-
-      return render json: { error: "No population data found" }, status: :not_found if total_population.zero?
-
-      rate_per_100k = (total_crimes.to_f / total_population) * 100_000
-
-      render json: {
-        crime_type: crime_type,
-        year: year,
-        total_crimes: total_crimes,
-        total_population: total_population,
-        incidence_rate_per_100k: rate_per_100k.round(2)
-      }
+    if crime_type.blank? || gender.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
+      return render json: { error: "Missing location parameters" }, status: :bad_request
     end
 
-    def crime_distribution_by_gender
-      crime_type = params[:crime_type]
-      gender = params[:gender]
-      year = params[:year].to_i
-       municipality_code = params[:municipality_code].to_i
-      department_code = params[:department_code].to_i
+    gender_crime_count = NewCrime.where(
+      municipality_code: municipality_code,
+      department_code: department_code,
+      crime_type: crime_type,
+      gender: gender,
+      year: year
+    ).sum(:quantity)
 
-      if crime_type.blank? || gender.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
-        return render json: { error: "Missing location parameters" }, status: :bad_request
-      end
+    total_gender_crimes = NewCrime.where(
+      municipality_code: municipality_code,
+      department_code: department_code,
+      gender: gender,
+      year: year
+    ).sum(:quantity)
 
-      gender_crime_count = NewCrime.where(
-        municipality_code: municipality_code,
-        department_code: department_code,
-        crime_type: crime_type,
-        gender: gender,
-        year: year
-      ).sum(:quantity)
-
-      total_gender_crimes = NewCrime.where(
-        municipality_code: municipality_code,
-        department_code: department_code,
-        gender: gender,
-        year: year
-      ).sum(:quantity)
-
-      if total_gender_crimes.zero?
-        return render json: { error: "No crime data found for this gender in the given year" }, status: :not_found
-      end
-
-      proportion = (gender_crime_count.to_f / total_gender_crimes) * 100
-
-      render json: {
-        crime_type: crime_type,
-        gender: gender,
-        year: year,
-        gender_crime_count: gender_crime_count,
-        total_gender_crimes: total_gender_crimes,
-        proportion_percent: proportion.round(2)
-      }
+    if total_gender_crimes.zero?
+      return render json: { error: "No crime data found for this gender in the given year" }, status: :not_found
     end
 
-    def crime_distribution_by_age_group
-      crime_type = params[:crime_type]
-      age_group = params[:age_group]
-      year = params[:year].to_i
-      municipality_code = params[:municipality_code].to_i
-      department_code = params[:department_code].to_i
+    proportion = (gender_crime_count.to_f / total_gender_crimes) * 100
 
-      if crime_type.blank? || age_group.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
-        return render json: { error: "Missing parameters" }, status: :bad_request
-      end
+    render json: {
+      crime_type: crime_type,
+      gender: gender,
+      year: year,
+      gender_crime_count: gender_crime_count,
+      total_gender_crimes: total_gender_crimes,
+      proportion_percent: proportion.round(2)
+    }
+  end
 
-      # Matching age group + crime type
-      age_group_crime_count = NewCrime.where(
-        municipality_code: municipality_code,
-        department_code: department_code,
-        crime_type: crime_type,
-        age_group: age_group,
-        year: year
-      ).sum(:quantity)
+  def crime_distribution_by_age_group
+    crime_type = params[:crime_type]
+    age_group = params[:age_group]
+    year = params[:year].to_i
+    municipality_code = params[:municipality_code].to_i
+    department_code = params[:department_code].to_i
 
-      # All crimes for that age group in that year & location
-      total_age_group_crimes = NewCrime.where(
-        municipality_code: municipality_code,
-        department_code: department_code,
-        age_group: age_group,
-        year: year
-      ).sum(:quantity)
-
-      if total_age_group_crimes.zero?
-        return render json: { error: "No crime data found for this age group in the given year" }, status: :not_found
-      end
-
-      proportion = (age_group_crime_count.to_f / total_age_group_crimes) * 100
-
-      render json: {
-        crime_type: crime_type,
-        age_group: age_group,
-        year: year,
-        age_group_crime_count: age_group_crime_count,
-        total_age_group_crimes: total_age_group_crimes,
-        proportion_percent: proportion.round(2)
-      }
+    if crime_type.blank? || age_group.blank? || year.zero? || (municipality_code.zero? && department_code.zero?)
+      return render json: { error: "Missing parameters" }, status: :bad_request
     end
 
-    def crime_distribution_by_weapon
-      crime_type = params[:crime_type]
-      weapon_code = params[:weapon_code].to_i
-      year = params[:year].to_i
-      municipality_code = params[:municipality_code].to_i
-      department_code = params[:department_code].to_i
+    # Matching age group + crime type
+    age_group_crime_count = NewCrime.where(
+      municipality_code: municipality_code,
+      department_code: department_code,
+      crime_type: crime_type,
+      age_group: age_group,
+      year: year
+    ).sum(:quantity)
 
-      if crime_type.blank? || weapon_code.zero? || year.zero? || (municipality_code.zero? && department_code.zero?)
-        return render json: { error: "Missing parameters" }, status: :bad_request
-      end
+    # All crimes for that age group in that year & location
+    total_age_group_crimes = NewCrime.where(
+      municipality_code: municipality_code,
+      department_code: department_code,
+      age_group: age_group,
+      year: year
+    ).sum(:quantity)
 
-      # Crimes of this type, with this weapon, in given year and location
-      weapon_crime_count = NewCrime.where(
-        crime_type: crime_type,
-        weapon_code: weapon_code,
-        year: year,
-        municipality_code: municipality_code,
-        department_code: department_code
-      ).sum(:quantity)
-
-      # Total crimes of this type in year and location (any weapon)
-      total_crime_count = NewCrime.where(
-        crime_type: crime_type,
-        year: year,
-        municipality_code: municipality_code,
-        department_code: department_code
-      ).sum(:quantity)
-
-      if total_crime_count.zero?
-        return render json: { error: "No crime data found for this type in the given year and location" }, status: :not_found
-      end
-
-      proportion = (weapon_crime_count.to_f / total_crime_count) * 100
-
-      render json: {
-        crime_type: crime_type,
-        weapon_code: weapon_code,
-        year: year,
-        weapon_crime_count: weapon_crime_count,
-        total_crime_count: total_crime_count,
-        proportion_percent: proportion.round(2)
-      }
+    if total_age_group_crimes.zero?
+      return render json: { error: "No crime data found for this age group in the given year" }, status: :not_found
     end
+
+    proportion = (age_group_crime_count.to_f / total_age_group_crimes) * 100
+
+    render json: {
+      crime_type: crime_type,
+      age_group: age_group,
+      year: year,
+      age_group_crime_count: age_group_crime_count,
+      total_age_group_crimes: total_age_group_crimes,
+      proportion_percent: proportion.round(2)
+    }
+  end
+
+  def crime_distribution_by_weapon
+    crime_type = params[:crime_type]
+    weapon_code = params[:weapon_code].to_i
+    year = params[:year].to_i
+    municipality_code = params[:municipality_code].to_i
+    department_code = params[:department_code].to_i
+
+    if crime_type.blank? || weapon_code.zero? || year.zero? || (municipality_code.zero? && department_code.zero?)
+      return render json: { error: "Missing parameters" }, status: :bad_request
+    end
+
+    # Crimes of this type, with this weapon, in given year and location
+    weapon_crime_count = NewCrime.where(
+      crime_type: crime_type,
+      weapon_code: weapon_code,
+      year: year,
+      municipality_code: municipality_code,
+      department_code: department_code
+    ).sum(:quantity)
+
+    # Total crimes of this type in year and location (any weapon)
+    total_crime_count = NewCrime.where(
+      crime_type: crime_type,
+      year: year,
+      municipality_code: municipality_code,
+      department_code: department_code
+    ).sum(:quantity)
+
+    if total_crime_count.zero?
+      return render json: { error: "No crime data found for this type in the given year and location" }, status: :not_found
+    end
+
+    proportion = (weapon_crime_count.to_f / total_crime_count) * 100
+
+    render json: {
+      crime_type: crime_type,
+      weapon_code: weapon_code,
+      year: year,
+      weapon_crime_count: weapon_crime_count,
+      total_crime_count: total_crime_count,
+      proportion_percent: proportion.round(2)
+    }
+  end
 
 
   def fetch_new_crime_data
@@ -590,46 +589,6 @@ end
   end
 
 
-  # def crime_type_by_municipalities
-  #   crime_type      = params[:crime_type]
-  #   variable        = params[:variable]
-  #   department_code = params[:department_code]
-
-  #   if crime_type.blank? || variable.blank? || department_code.blank?
-  #     return render json: { error: "crime_type, variable, and department_code are required" }, status: :bad_request
-  #   end
-
-  #   unless %w[gender age_group weapons_types].include?(variable)
-  #     return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
-  #   end
-
-  #   # Filter scope for the given crime_type + department
-  #   scope = NewCrime.where(crime_type: crime_type, department_code: department_code)
-
-  #   # Group by municipality + variable
-  #   results = scope.group(:municipality, variable).sum(:quantity)
-  #     .group_by { |(mun, _), _| mun }
-  #     .map do |mun, values|
-  #       breakdown = values.map do |(_, var), total|
-  #         { variable => var, total: total }
-  #       end
-
-  #       total_count = breakdown.sum { |d| d[:total] }
-
-  #       {
-  #         municipality: mun,
-  #         total: total_count,
-  #         breakdown: breakdown
-  #       }
-  #     end
-
-  #   render json: {
-  #     crime_type: crime_type,
-  #     variable: variable,
-  #     department_code: department_code,
-  #     data: results
-  #   }
-  # end
 
   def crime_type_by_municipalities
     crime_type      = params[:crime_type]

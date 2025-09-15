@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_04_072856) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_10_120438) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -473,6 +473,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_072856) do
     t.integer "weapon_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "gender_code"
+    t.integer "age_group_code"
   end
 
   create_table "new_fallecidos", force: :cascade do |t|
@@ -820,6 +822,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_072856) do
     t.string "dane_code_anm"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "department"
+    t.string "municipality"
     t.index ["dane_code_anm"], name: "index_unique_georreferenciacions_on_dane_code_anm", unique: true
   end
 
