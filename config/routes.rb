@@ -31,6 +31,12 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :new_marco_de_georreferenciacions do
+    collection do
+      post :import_divipola
+    end
+  end
+
   get 'vivienda_statistics/fetch_stat', to: 'vivienda_statistics#fetch_stat'
   post 'municipio/create_bulk_municipios', to: 'municipios#create_bulk_municipios'
   post 'crimes/bulk_create', to: 'crimes#create_bulk_crimes'
@@ -76,7 +82,7 @@ Rails.application.routes.draw do
   get 'persona/export_municipality_data_batch', to: 'personas#export_municipality_data_batch'
 
   post '/crime_formula/populate_crime_extorsions', to: 'crime_formula#populate_crime_extorsions'
-  get '/fetch_crime_data', to: 'crimes#fetch_crime_data'
+  post '/fetch_crime_data', to: 'crimes#fetch_crime_data'
   post '/fetch_new_crime_data', to: 'crimes#fetch_new_crime_data'
   post '/crime_incidence_rate', to: 'crimes#crime_incidence_rate'
   post '/crime_distribution_by_gender', to: 'crimes#crime_distribution_by_gender'

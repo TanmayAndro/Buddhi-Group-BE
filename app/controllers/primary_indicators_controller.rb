@@ -3,7 +3,7 @@ class PrimaryIndicatorsController < ApplicationController
 	def calculate_all
 		CalculateAllPrimaryJob.perform_later
 		render json: { message: "📊 primary calculation job has been enqueued." }, status: :accepted
-	end	
+	end
 
 
 	# def fetch_primary_indicator_data_fast_sql
@@ -118,7 +118,6 @@ class PrimaryIndicatorsController < ApplicationController
 		query = query.where(unique_georreferenciacions: { urban_section: urban_section_code }) if urban_section_code.present?
 
 		if column_name == "ethnic_composition"
-			# Extract all unique keys safely (ignore NULLs / scalars)
 			keys = PrimaryIndicator.where("jsonb_typeof(ethnic_composition) = 'object'")
 														.distinct
 														.pluck(Arel.sql("jsonb_object_keys(ethnic_composition)"))
@@ -154,8 +153,5 @@ class PrimaryIndicatorsController < ApplicationController
 		end
 
 		render json: { results: formatted }
-  end
-
-
-
+	end
 end
