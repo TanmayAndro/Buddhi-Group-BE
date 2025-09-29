@@ -11,6 +11,14 @@ Rails.application.routes.draw do
   # Main resources
   resources :crimes
   resources :municipios
+  resources :electoral_rolls do
+    collection do
+      post :import
+      post :import_polling_station
+      post :import_votes 
+    end
+  end
+
 
   resources :fundamental_indicators, only: [:create] do
     collection do

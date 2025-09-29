@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_10_120438) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -355,6 +355,26 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_10_120438) do
   create_table "edad_falls", force: :cascade do |t|
     t.integer "value"
     t.string "category"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "electoral_rolls", force: :cascade do |t|
+    t.integer "election_year"
+    t.string "election_type"
+    t.string "department_code"
+    t.string "municipality_code"
+    t.string "voting_zone_code"
+    t.string "polling_station_code"
+    t.string "department_name"
+    t.string "municipality_name"
+    t.string "polling_station_name"
+    t.integer "women"
+    t.integer "men"
+    t.integer "total"
+    t.integer "total_polling_tables_at_station"
+    t.string "district"
+    t.string "polling_station_address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -730,6 +750,26 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_10_120438) do
     t.integer "type_of_record"
   end
 
+  create_table "polling_stations", force: :cascade do |t|
+    t.integer "election_year"
+    t.string "election_type"
+    t.string "department_name"
+    t.string "municipality_name"
+    t.string "polling_station_name"
+    t.string "district"
+    t.string "district_code"
+    t.string "latitude"
+    t.string "longitude"
+    t.boolean "is_mayor_elected_at_this_station"
+    t.boolean "is_governor_elected_at_this_station"
+    t.boolean "is_municipal_council_elected"
+    t.boolean "is_department_assembly_elected"
+    t.boolean "is_local_administrative_board"
+    t.integer "total_number_of_election_type_at_the_station"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "populated_centers", force: :cascade do |t|
     t.bigint "rural_section_id", null: false
     t.datetime "created_at", null: false
@@ -877,6 +917,40 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_10_120438) do
   create_table "vivo_anos", force: :cascade do |t|
     t.integer "value"
     t.string "category"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "votes", force: :cascade do |t|
+    t.integer "election_year"
+    t.string "election_code"
+    t.string "election_description"
+    t.string "electoral_process_code"
+    t.string "electoral_process_description"
+    t.date "election_date"
+    t.string "corporation_code"
+    t.string "corporation_name"
+    t.string "popular_election_code"
+    t.string "popular_election_description"
+    t.string "constituency_code"
+    t.string "constituency_description"
+    t.string "citrep_code"
+    t.string "citrep_description"
+    t.string "department_code"
+    t.string "department_name"
+    t.string "municipality_code"
+    t.string "municipality_name"
+    t.string "voting_zone_code"
+    t.string "polling_station_code"
+    t.string "polling_station_name"
+    t.string "commune_code"
+    t.string "commune_description"
+    t.string "polling_table_code"
+    t.integer "number_of_votes_recorded"
+    t.string "political_party_code"
+    t.string "political_party_name"
+    t.string "candidate_code"
+    t.string "candidate_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

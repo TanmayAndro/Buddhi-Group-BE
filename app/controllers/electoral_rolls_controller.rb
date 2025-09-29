@@ -1,0 +1,144 @@
+class ElectoralRollsController < ApplicationController
+  require 'roo'
+
+  def import
+    file = params[:file]
+    return render json: { error: "No file uploaded" }, status: :bad_request unless file.present?
+
+    # Open XLSX file with Roo
+    xlsx = Roo::Spreadsheet.open(file.path)
+    sheet = xlsx.sheet(0) # use first sheet
+
+    headers = sheet.row(1).map(&:to_s) # first row = headers
+    inserted_rows = 0
+
+    (2..sheet.last_row).each do |i|
+      row = Hash[[headers, sheet.row(i)].transpose]
+
+      record = ElectoralRoll.new(
+        election_year:            row["ELECTION_YEAR"],
+        election_type:            row["ELECTION_TYPE"],
+        department_code:          row["DEP_COD"],
+        municipality_code:        row["MUN_COD"],
+        voting_zone_code:         row["ZONE_COD"],
+        polling_station_code:     row["POLLING_COD"],
+        department_name:          row["DEP_NAME"],
+        municipality_name:        row["MUN_NAME"], # optional, only if present
+        polling_station_name:     row["POLLING_NAME"],
+        women:                    row["WOMEN"],
+        men:                      row["MEN"],
+        total:                    row["TOTAL"],
+        total_polling_tables_at_station:     row["TABLES"],
+        district:                 row["DISTRIC"],
+        polling_station_address:  row["ADDRESS"]
+      )
+
+      inserted_rows += 1 if record.save
+    end
+
+    render json: { message: "Import completed", inserted: inserted_rows }
+  end
+
+  def import_votes
+    file = params[:file]
+    return render json: { error: "No file uploaded" }, status: :bad_request unless file.present?
+
+    tmp_file = Rails.root.join("tmp", file.original_filename)
+    File.open(tmp_file, "wb") { |f| f.write(file.read) }
+
+    ImportVotesJob.perform_later(tmp_file.to_s)
+
+    render json: { message: "File upload received. Import is running in background." }
+  end
+
+
+  def import_polling_station
+    file = params[:file]
+    return render json: { error: "No file uploaded" }, status: :bad_request unless file.present?
+
+    xlsx = Roo::Spreadsheet.open(file.path)
+    sheet = xlsx.sheet(0)
+
+    headers = sheet.row(1).map(&:to_s)
+    inserted_rows = 0
+
+    (2..sheet.last_row).each do |i|
+      row = Hash[[headers, sheet.row(i)].transpose]
+
+      record = PollingStation.new(
+        election_year:                          row["ELECTION_YEAR"],
+        election_type:                          row["ELECTION_TYPE"],
+        department_name:                        row["DEP_NAME"],
+        municipality_name:                      row["MUN_NAME"], # second DEP_NAME in your file
+        polling_station_name:                    row["POLLING_NAME"],
+        district:                                row["DISTRIC"],
+        district_code:                           row["DISTRIC_CODE"],  # if you have a separate code, replace it
+        latitude:                                row["LAT"],
+        longitude:                               row["LONG"],
+        is_mayor_elected_at_this_station:       row["MAYOR"],
+        is_governor_elected_at_this_station:    row["GOBERN"],
+        is_municipal_council_elected:           row["COUNCIL"],
+        is_department_assembly_elected:         row["ASSEMBLY"],
+        is_local_administrative_board:          row["JAL"],
+        total_number_of_election_type_at_the_station: row["ELECTIONS_NUMBER"]
+      )
+
+      inserted_rows += 1 if record.save
+    end
+
+    render json: { message: "Import completed", inserted: inserted_rows }
+  end
+  # def import
+  #   file = params[:file]
+  #   return render json: { error: "No file uploaded" }, status: :bad_request unless file.present?
+
+  #   xlsx = Roo::Spreadsheet.open(file.path)
+  #   sheet = xlsx.sheet(0)
+
+  #   headers = sheet.row(1).map(&:to_s).map(&:strip)
+  #   inserted_rows = 0
+
+  #   (2..sheet.last_row).each do |i|
+  #     row = Hash[[headers, sheet.row(i)].transpose]
+
+  #     record = ElectoralRoll.new(
+  #       election_year:                   safe_integer(row["ELECTION_YEAR"]),
+  #       election_type:                   safe_string(row["ELECTION_TYPE"]),
+  #       department_code:                 safe_string(row["DEP_COD"]),
+  #       municipality_code:               safe_string(row["MUN_COD"]),
+  #       voting_zone_code:                safe_string(row["ZONE_COD"]),
+  #       polling_station_code:            safe_string(row["POLLING_COD"]),
+  #       department_name:                 safe_string(row["DEP_NAME"]),
+  #       municipality_name:               safe_string(row["MUN_NAME"]),
+  #       polling_station_name:            safe_string(row["POLLING_NAME"]),
+  #       women:                           safe_integer(row["WOMEN"]),
+  #       men:                             safe_integer(row["MEN"]),
+  #       total:                           safe_integer(row["TOTAL"]),
+  #       total_polling_tables_at_station: safe_integer(row["TABLES"]),
+  #       district:                        safe_string(row["DISTRIC"]),
+  #       polling_station_address:         safe_string(row["ADDRESS"])
+  #     )
+
+  #     inserted_rows += 1 if record.save
+  #   end
+
+  #   render json: { message: "Import completed", inserted: inserted_rows }
+  # end
+
+  # private
+
+  # # Strips spaces, converts blank string or nil → nil
+  # def safe_string(value)
+  #   return nil if value.nil?
+  #   str = value.to_s.strip
+  #   str.empty? ? nil : str
+  # end
+
+  # # Converts blank/nil to nil, else integer
+  # def safe_integer(value)
+  #   return nil if value.nil?
+  #   str = value.to_s.strip
+  #   str.empty? ? nil : str.to_i
+  # end
+
+end
