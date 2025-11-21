@@ -1,0 +1,3 @@
+class ElectionFundamentalIndicator < ApplicationRecord
+     
+end
