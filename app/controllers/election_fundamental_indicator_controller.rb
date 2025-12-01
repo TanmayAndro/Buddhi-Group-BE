@@ -189,11 +189,6 @@ class ElectionFundamentalIndicatorController < ApplicationController
 
 	end
 
-	# a = NewElectionFundamentalIndicator.where(election_year: 2014).pluck(:new_polling_id).uniq
-	# b = ElectoralRoll.where(election_year: 2014).pluck(:nov_polling_id).uniq
-
-	# matching_count = (a & b).count
-	# puts matching_count
 
 	def update_data_from_electoral_rolls_to_new_election_fundamental_indicator
 
@@ -225,4 +220,115 @@ class ElectionFundamentalIndicatorController < ApplicationController
   	puts "🎉 All years processed."
 	end
 
+  def export_csv_of_election_fundamental_indicator
+    base_dir = Rails.root.join("tmp", "department_exports")
+      FileUtils.mkdir_p(base_dir)
+
+     excluded_columns = %w[
+      id created_at updated_at zone_code polling_id candidate_results candidate_code political_party_code political_party_name candidate_name dec_polling_id
+      lat lon mayor gobern council assembly jal
+    ]
+
+      department_codes = NewElectionFundamentalIndicator.distinct.pluck(:department_code)
+
+      department_codes.each do |dept_code|
+        years = ElectionFundamentalIndicator
+                  .where(department_code: dept_code)
+                  .distinct
+                  .pluck(:election_year)
+
+        years.each do |yr|
+          records = NewElectionFundamentalIndicator.where(department_code: dept_code, election_year: yr)
+          next if records.empty?
+
+          file_path = base_dir.join("department_#{dept_code}_year_#{yr}.csv")
+
+          columns = NewElectionFundamentalIndicator.column_names - excluded_columns
+
+          CSV.open(file_path, "w") do |csv|
+            csv << columns 
+
+            records.find_each do |record|
+              csv << columns.map do |col|
+                value = record.send(col)
+                value.nil? ? 0 : value
+              end
+            end
+          end
+
+          puts "✅ Exported department #{dept_code} election_year #{yr} → #{file_path}"
+        end
+      end
+
+      puts "🎉 All 2018 department/year CSVs exported to: #{base_dir}"
+  end
+
+  def export_csv_of_election_fundamental_indicator_new
+    base_dir = Rails.root.join("tmp", "department_exports")
+    FileUtils.mkdir_p(base_dir)
+
+    excluded_columns = %w[
+      id created_at updated_at zone_code polling_id candidate_results candidate_code political_party_code political_party_name candidate_name dec_polling_id
+      lat lon mayor gobern council assembly jal
+    ]
+
+    department_codes = NewElectionFundamentalIndicator.distinct.pluck(:department_code)
+
+    department_codes.each do |dept_code|
+      years = NewElectionFundamentalIndicator
+                .where(department_code: dept_code)
+                .distinct
+                .pluck(:election_year)
+
+      years.each do |yr|
+        records = NewElectionFundamentalIndicator.where(department_code: dept_code, election_year: yr)
+        next if records.empty?
+
+        file_path = base_dir.join("department_#{dept_code}_year_#{yr}.csv")
+
+
+        original_columns = NewElectionFundamentalIndicator.column_names - excluded_columns
+
+
+        extra_columns = [
+          "candidate_name",
+          "party_code",
+          "party_name",
+          "candidate_code"
+        ]
+
+        CSV.open(file_path, "w") do |csv|
+          csv << (original_columns + extra_columns)
+
+          records.find_each do |record|
+
+            if record.candidate_results.blank?
+              csv << original_columns.map { |col| record.send(col) }
+              next
+            end
+
+            record.candidate_results.each do |cand|
+              candidate_name = cand["candidate"]
+
+              meta = record.meta_for(candidate_name)
+
+              csv << (
+                original_columns.map { |col| record.send(col) } +
+                [
+                  candidate_name,
+                  meta ? meta[:party_code] : nil,
+                  meta ? meta[:party_name] : nil,
+                  meta ? meta[:candidate_code] : nil
+                ]
+              )
+            end
+          end
+        end
+
+        puts "✅ Exported department #{dept_code} election_year #{yr} → #{file_path}"
+      end
+    end
+
+    puts "🎉 All department/year CSV exports completed → #{base_dir}"
+  end
 end
