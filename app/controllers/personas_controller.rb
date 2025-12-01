@@ -179,6 +179,45 @@ class PersonasController < ApplicationController
   
     send_data csv_data, filename: "municipality_age_group_counts_batch_#{batch_number}.csv"
   end 
-  
+
+
+  def create_bulk_dane_codes
+    if params[:file].nil?
+      render json: { error: 'No file uploaded' }, status: :bad_request
+      return
+    end
+
+    begin
+      xls_file = params[:file].tempfile
+      spreadsheet = Roo::Spreadsheet.open(xls_file)
+      sheet = spreadsheet.sheet(0)
+
+      header = sheet.row(1)
+      dane_index = header.index("DANE_CODE")
+
+      if dane_index.nil?
+        render json: { error: 'DANE_CODE column not found in file' }, status: :bad_request
+        return
+      end
+
+      ActiveRecord::Base.transaction do
+        sheet.each_row_streaming(offset: 1) do |row|
+          next if row.compact.empty?
+
+          dane_value = row[dane_index]&.value
+          next if dane_value.nil?
+
+          DaneCodeTesting.create!(
+            dane_code_anm: dane_value.to_s
+          )
+        end
+      end
+
+      render json: { message: 'DANE_CODE imported successfully' }, status: :ok
+
+    rescue StandardError => e
+      render json: { error: "An error occurred: #{e.message}" }, status: :internal_server_error
+    end
+  end
 
 end

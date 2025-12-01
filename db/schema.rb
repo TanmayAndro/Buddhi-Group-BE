@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_24_062327) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -339,6 +339,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.integer "weapon_code"
   end
 
+  create_table "dane_code_testings", force: :cascade do |t|
+    t.string "dane_code_anm"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "departamentos", force: :cascade do |t|
     t.integer "value"
     t.text "category"
@@ -359,6 +365,44 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "election_fundamental_indicators", force: :cascade do |t|
+    t.integer "total_ballots_cast"
+    t.integer "valid_votes"
+    t.integer "blank_votes"
+    t.integer "null_votes"
+    t.integer "unmarked_votes"
+    t.string "polling_id"
+    t.jsonb "candidate_results"
+    t.string "election_code"
+    t.string "election_year"
+    t.string "department_code"
+    t.string "municipality_code"
+    t.string "zone_code"
+    t.string "polling_station_code"
+    t.string "polling_station_name"
+    t.string "tables"
+    t.string "distric"
+    t.string "polling_station_address"
+    t.string "lat"
+    t.string "lon"
+    t.string "women"
+    t.string "men"
+    t.string "total"
+    t.string "mayor"
+    t.string "gobern"
+    t.string "council"
+    t.string "assembly"
+    t.string "jal"
+    t.string "table_code"
+    t.string "political_party_code"
+    t.string "political_party_name"
+    t.string "candidate_code"
+    t.string "candidate_name"
+    t.datetime "created_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "updated_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "new_polling_id"
+  end
+
   create_table "electoral_rolls", force: :cascade do |t|
     t.integer "election_year"
     t.string "election_type"
@@ -377,6 +421,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.string "polling_station_address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "polling_id"
+    t.string "new_polling_id"
+    t.string "nov_polling_id"
+    t.index ["polling_id"], name: "index_electoral_rolls_on_polling_id"
   end
 
   create_table "etnias", force: :cascade do |t|
@@ -495,6 +543,46 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.datetime "updated_at", null: false
     t.integer "gender_code"
     t.integer "age_group_code"
+  end
+
+  create_table "new_election_fundamental_indicators", force: :cascade do |t|
+    t.integer "total_ballots_cast"
+    t.integer "valid_votes"
+    t.integer "blank_votes"
+    t.integer "null_votes"
+    t.integer "unmarked_votes"
+    t.string "polling_id"
+    t.jsonb "candidate_results"
+    t.string "election_code"
+    t.string "election_year"
+    t.string "department_code"
+    t.string "municipality_code"
+    t.string "zone_code"
+    t.string "polling_station_code"
+    t.string "polling_station_name"
+    t.string "tables"
+    t.string "distric"
+    t.string "polling_station_address"
+    t.string "lat"
+    t.string "lon"
+    t.string "women"
+    t.string "men"
+    t.string "total"
+    t.string "mayor"
+    t.string "gobern"
+    t.string "council"
+    t.string "assembly"
+    t.string "jal"
+    t.string "table_code"
+    t.string "political_party_code"
+    t.string "political_party_name"
+    t.string "candidate_code"
+    t.string "candidate_name"
+    t.string "new_polling_id"
+    t.string "voting_round"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "dec_polling_id"
   end
 
   create_table "new_fallecidos", force: :cascade do |t|
@@ -628,6 +716,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.string "urban_section"
     t.string "block"
     t.string "dane_code_anm"
+    t.string "new_age_group"
     t.index ["block", "activity_status"], name: "index_new_personas_on_block_and_activity_status"
     t.index ["block", "age_group"], name: "index_new_personas_on_block_and_age_group"
     t.index ["block", "child_birth"], name: "index_new_personas_on_block_and_child_birth"
@@ -683,6 +772,44 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.index ["block", "sanitory_quality"], name: "index_new_viviendas_on_block_and_sanitory_quality"
     t.index ["block"], name: "index_new_viviendas_on_block"
     t.index ["common_key"], name: "index_new_viviendas_on_common_key"
+  end
+
+  create_table "new_votes", force: :cascade do |t|
+    t.integer "election_year"
+    t.string "election_code"
+    t.string "election_description"
+    t.string "electoral_process_code"
+    t.string "electoral_process_description"
+    t.date "election_date"
+    t.string "corporation_code"
+    t.string "corporation_name"
+    t.string "popular_election_code"
+    t.string "popular_election_description"
+    t.string "constituency_code"
+    t.string "constituency_description"
+    t.string "citrep_code"
+    t.string "citrep_description"
+    t.string "department_code"
+    t.string "department_name"
+    t.string "municipality_code"
+    t.string "municipality_name"
+    t.string "voting_zone_code"
+    t.string "polling_station_code"
+    t.string "polling_station_name"
+    t.string "commune_code"
+    t.string "commune_description"
+    t.string "polling_table_code"
+    t.integer "number_of_votes_recorded"
+    t.string "political_party_code"
+    t.string "political_party_name"
+    t.string "candidate_code"
+    t.string "candidate_name"
+    t.string "old_polling_id"
+    t.string "updated_candidate_list"
+    t.string "new_polling_id"
+    t.string "voting_round"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "nro_hogars", force: :cascade do |t|
@@ -768,6 +895,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.integer "total_number_of_election_type_at_the_station"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "polling_id"
+    t.string "department_code"
+    t.string "municipality_code"
+    t.string "polling_station_code"
   end
 
   create_table "populated_centers", force: :cascade do |t|
@@ -953,6 +1084,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_24_100043) do
     t.string "candidate_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "polling_id"
+    t.string "updated_candidate_list"
+    t.string "new_polling_id"
   end
 
   add_foreign_key "blocks", "urban_sections"

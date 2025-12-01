@@ -1,0 +1,2 @@
+class DaneCodeTesting < ApplicationRecord
+end

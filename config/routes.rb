@@ -85,7 +85,12 @@ Rails.application.routes.draw do
   resources :fallecidos
   post 'fallecido/create_bulk_fallecidos', to: 'fallecidos#create_bulk_fallecidos'
 
-  resources :personas
+  resources :personas do
+    collection do
+      post :create_bulk_dane_codes
+    end
+  end
+
   post 'persona/create_bulk_personas', to: 'personas#create_bulk_personas'
   get 'persona/export_municipality_data_batch', to: 'personas#export_municipality_data_batch'
 
