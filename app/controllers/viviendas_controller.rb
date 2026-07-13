@@ -89,7 +89,6 @@ class ViviendasController < ApplicationController
           end
         end
 
-        # Insert remaining rows
         NewVivienda.insert_all(viviendas) if viviendas.any?
       end
 

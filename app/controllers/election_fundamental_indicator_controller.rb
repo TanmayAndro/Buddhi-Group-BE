@@ -2,17 +2,17 @@ class ElectionFundamentalIndicatorController < ApplicationController
 
 	def update_new_polling_id_from_vote_to_new_election_fundamental_indicator
   	[2014, 2018, 2022].each do |year|
-    	puts "🗳️ Starting processing for election year #{year}..."
+    	puts "Starting processing for election year #{year}..."
 
     	rounds = NewVote.where(election_year: year)
                     .where.not(voting_round: nil)
                     .distinct
                     .pluck(:voting_round)
 
-    puts "🔄 Found rounds #{rounds.inspect} for year #{year}"
+    puts "Found rounds #{rounds.inspect} for year #{year}"
 
     rounds.each do |round|
-      puts "➡️ Processing Round #{round} for Year #{year}"
+      puts "Processing Round #{round} for Year #{year}"
 
       agg_sql = <<-SQL
         SELECT
@@ -121,14 +121,14 @@ class ElectionFundamentalIndicatorController < ApplicationController
           voting_round: row['voting_round']
         )
 
-        puts "✅ Updated #{idx + 1}/#{aggregated.count} for #{year} Round #{round}" if (idx + 1) % 1000 == 0
+        puts "Updated #{idx + 1}/#{aggregated.count} for #{year} Round #{round}" if (idx + 1) % 1000 == 0
       end
 
-      puts "🎯 Completed updates for election year #{year}, round #{round}"
+      puts "Completed updates for election year #{year}, round #{round}"
     end
   	end
 
-  	puts "🎉 All election years & rounds updated successfully!"
+  	puts "All election years & rounds updated successfully!"
 	end
 
 	def construct_new_polling_id
@@ -162,14 +162,14 @@ class ElectionFundamentalIndicatorController < ApplicationController
 				ElectionFundamentalIndicator.insert_all(batch)
 			end
 
-			puts "✅ Inserted #{polling_ids.size} records for election_year #{year}"
+			puts "Inserted #{polling_ids.size} records for election_year #{year}"
 		end
 
-		puts "🎉 Done creating all ElectionFundamentalIndicator records!"
+		puts "Done creating all ElectionFundamentalIndicator records!"
 	end
 
 	def update_dec_polling_id_from_new_polling_id
-		puts "🚀 Updating dec_polling_id for all records..."
+		puts "Updating dec_polling_id for all records..."
 
 		ActiveRecord::Base.connection.execute(<<~SQL)
 			UPDATE new_election_fundamental_indicators
@@ -177,7 +177,7 @@ class ElectionFundamentalIndicatorController < ApplicationController
 			WHERE new_polling_id IS NOT NULL;
 		SQL
 
-		puts "✅ All dec_polling_id values updated successfully!"
+		puts "All dec_polling_id values updated successfully!"
 	end
 
 	def add_zero_before
@@ -193,7 +193,7 @@ class ElectionFundamentalIndicatorController < ApplicationController
 	def update_data_from_electoral_rolls_to_new_election_fundamental_indicator
 
 		[2014, 2018, 2022].each do |year|
-			puts "🔵 Updating year #{year}..."
+			puts "Updating year #{year}..."
 
 			NewElectionFundamentalIndicator.where(election_year: year).find_each do |record|
 			er = ElectoralRoll.find_by(
@@ -214,10 +214,10 @@ class ElectionFundamentalIndicatorController < ApplicationController
 			)
 			end
 
-			puts "✔ Finished updating #{year}"
+			puts "Finished updating #{year}"
 		end
 
-  	puts "🎉 All years processed."
+  	puts "All years processed."
 	end
 
   def export_csv_of_election_fundamental_indicator
@@ -256,11 +256,11 @@ class ElectionFundamentalIndicatorController < ApplicationController
             end
           end
 
-          puts "✅ Exported department #{dept_code} election_year #{yr} → #{file_path}"
+          puts "Exported department #{dept_code} election_year #{yr} → #{file_path}"
         end
       end
 
-      puts "🎉 All 2018 department/year CSVs exported to: #{base_dir}"
+      puts "All 2018 department/year CSVs exported to: #{base_dir}"
   end
 
   def export_csv_of_election_fundamental_indicator_new
@@ -325,10 +325,10 @@ class ElectionFundamentalIndicatorController < ApplicationController
           end
         end
 
-        puts "✅ Exported department #{dept_code} election_year #{yr} → #{file_path}"
+        puts "Exported department #{dept_code} election_year #{yr} → #{file_path}"
       end
     end
 
-    puts "🎉 All department/year CSV exports completed → #{base_dir}"
+    puts "All department/year CSV exports completed → #{base_dir}"
   end
 end

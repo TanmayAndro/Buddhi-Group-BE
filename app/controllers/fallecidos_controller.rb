@@ -54,7 +54,6 @@ class FallecidosController < ApplicationController
           end
         end
 
-        # Insert remaining rows
         NewFallecido.insert_all(fallecidos) if fallecidos.any?
       end
 

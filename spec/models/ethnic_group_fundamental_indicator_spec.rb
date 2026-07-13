@@ -1,4 +1,3 @@
-# spec/models/fundamental_indicator_spec.rb
 require "rails_helper"
 
 RSpec.describe FundamentalIndicator, type: :model do

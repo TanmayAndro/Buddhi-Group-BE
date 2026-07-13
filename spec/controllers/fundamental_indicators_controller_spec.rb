@@ -13,7 +13,7 @@ RSpec.describe FundamentalIndicatorsController, type: :controller do
 
       expect(response).to have_http_status(:accepted)
       expect(JSON.parse(response.body)).to eq(
-        { "message" => "📊 Indicator calculation job has been enqueued." }
+        { "message" => "Indicator calculation job has been enqueued." }
       )
     end
   end

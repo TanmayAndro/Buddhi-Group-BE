@@ -128,7 +128,6 @@ class PersonasController < ApplicationController
           end
         end
 
-        # Insert remaining rows
         NewPersona.insert_all(personas) if personas.any?
       end
 

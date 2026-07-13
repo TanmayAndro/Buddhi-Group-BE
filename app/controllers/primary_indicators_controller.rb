@@ -2,7 +2,7 @@ class PrimaryIndicatorsController < ApplicationController
 
 	def calculate_all
 		CalculateAllPrimaryJob.perform_later
-		render json: { message: "📊 primary calculation job has been enqueued." }, status: :accepted
+		render json: { message: "primary calculation job has been enqueued." }, status: :accepted
 	end
 
 

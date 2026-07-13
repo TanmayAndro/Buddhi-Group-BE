@@ -1,4 +1,3 @@
-# spec/models/unique_georreferenciacion_spec.rb
 require 'rails_helper'
 
 RSpec.describe UniqueGeorreferenciacion, type: :model do
@@ -36,19 +35,19 @@ RSpec.describe UniqueGeorreferenciacion, type: :model do
 
       if mismatches.any?
         puts "\n--- Dane Code Verification Report ---"
-        puts "✅ Matched: #{matched}"
-        puts "❌ Not matched: #{mismatches.size}"
-        puts "📊 Total checked: #{total}"
+        puts "Matched: #{matched}"
+        puts "Not matched: #{mismatches.size}"
+        puts "Total checked: #{total}"
         puts "\nSample mismatches:"
         mismatches.first(10).each do |m|
           puts "Record ##{m[:id]}: expected=#{m[:expected]}, actual=#{m[:actual]}"
         end
       else
         puts "\n--- Dane Code Verification Report ---"
-        puts "✅ All #{matched} records matched successfully!"
+        puts "All #{matched} records matched successfully!"
       end
 
-      expect(mismatches).to be_empty, "❌ #{mismatches.size} records have mismatched dane_code_anm"
+      expect(mismatches).to be_empty, "#{mismatches.size} records have mismatched dane_code_anm"
     end
   end
 end

@@ -180,7 +180,7 @@ RSpec.describe PrimaryIndicatorsController, type: :controller do
 
       expect(response).to have_http_status(:accepted)
       expect(JSON.parse(response.body)).to eq(
-        { "message" => "📊 primary calculation job has been enqueued." }
+        { "message" => "primary calculation job has been enqueued." }
       )
     end
   end

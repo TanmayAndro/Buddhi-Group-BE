@@ -1,3 +1,3 @@
 class NroHogar < ApplicationRecord
-    self.table_name = :nro_hogars
+	self.table_name = :nro_hogars
 end

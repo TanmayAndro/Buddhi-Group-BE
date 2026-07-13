@@ -19,28 +19,23 @@ class CrimesController < ApplicationController
         department   = row[1].to_s.strip
         municipality = row[2].to_s.strip
 
-        # Skip rows where department or municipality is missing
         next if department.blank? || municipality.blank?
 
-        # Normalize weapons_types
         weapons_types = begin
           str = row[4].to_s.strip.upcase
           (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
         end
 
-        # Normalize gender
         gender = begin
           str = row[6].to_s.strip.upcase
           (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
         end
 
-        # Normalize age_group
         age_group = begin
           str = row[7].to_s.gsub('*', '').strip.upcase
           (str.blank? || str == '-' || str == 'NO REPORTA') ? 'NO REPORTADO' : str.titleize
         end
 
-        # Default quantity to 0 if nil or blank
         quantity = row[8].to_i rescue 0
 
         records << {
@@ -147,7 +142,6 @@ class CrimesController < ApplicationController
       return render json: { error: "Missing parameters" }, status: :bad_request
     end
 
-    # Matching age group + crime type
     age_group_crime_count = NewCrime.where(
       municipality_code: municipality_code,
       department_code: department_code,
@@ -156,7 +150,6 @@ class CrimesController < ApplicationController
       year: year
     ).sum(:quantity)
 
-    # All crimes for that age group in that year & location
     total_age_group_crimes = NewCrime.where(
       municipality_code: municipality_code,
       department_code: department_code,
@@ -191,7 +184,6 @@ class CrimesController < ApplicationController
       return render json: { error: "Missing parameters" }, status: :bad_request
     end
 
-    # Crimes of this type, with this weapon, in given year and location
     weapon_crime_count = NewCrime.where(
       crime_type: crime_type,
       weapon_code: weapon_code,
@@ -200,7 +192,6 @@ class CrimesController < ApplicationController
       department_code: department_code
     ).sum(:quantity)
 
-    # Total crimes of this type in year and location (any weapon)
     total_crime_count = NewCrime.where(
       crime_type: crime_type,
       year: year,
@@ -368,7 +359,6 @@ class CrimesController < ApplicationController
         }
       end
 
-      # Monthly breakdown by weapons
      crimes_by_weapons = scope.group(:year, :weapons_types).sum(:quantity)
       .group_by { |(year, _), _| year }
       .map do |year, values|
@@ -468,10 +458,8 @@ class CrimesController < ApplicationController
       return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
     end
 
-    # Filter scope
     scope = NewCrime.where(crime_type: crime_type)
 
-    # Group by year + variable
     results = scope.group(:year, variable).sum(:quantity)
       .group_by { |(year, _), _| year }
       .map do |year, values|
@@ -488,7 +476,6 @@ class CrimesController < ApplicationController
         }
       end
 
-    # Fill in missing years (2010–2025) with zeros
     full_results = (2010..2025).map do |year|
       found = results.find { |r| r[:year] == year }
       found || { year: year, total: 0, breakdown: [] }
@@ -557,7 +544,6 @@ class CrimesController < ApplicationController
 
     scope = NewCrime.where(crime_type: crime_type, year: year)
 
-    # Group by month + variable
     results = scope.group(:month, variable).sum(:quantity)
       .group_by { |(month, _), _| month }
       .map do |month, values|
@@ -574,7 +560,6 @@ class CrimesController < ApplicationController
         }
       end
 
-    # Fill months 1–12 (ensure all months present)
     full_results = (1..12).map do |m|
       found = results.find { |r| r[:month] == m }
       found || { month: m, total: 0, breakdown: [] }
@@ -603,10 +588,8 @@ class CrimesController < ApplicationController
       return render json: { error: "Invalid variable. Allowed: gender, age_group, weapons_types" }, status: :bad_request
     end
 
-    # Filter scope for the given crime_type + department
     scope = NewCrime.where(crime_type: crime_type, department_code: department_code)
 
-    # Group by municipality + variable
     results = scope.group(:municipality, :municipality_code, variable).sum(:quantity)
       .group_by { |(mun, _, _), _| mun }
       .map do |mun, values|
@@ -615,7 +598,7 @@ class CrimesController < ApplicationController
         end
 
         total_count = breakdown.sum { |d| d[:total] }
-        municipality_code = values.first[0][1] # pick municipality_code from grouped keys
+        municipality_code = values.first[0][1]
 
         {
           municipality: mun,

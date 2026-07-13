@@ -1,3 +1,3 @@
 class Municipio < ApplicationRecord
-    self.table_name = :municipios
+	self.table_name = :municipios
 end

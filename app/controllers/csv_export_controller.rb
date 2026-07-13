@@ -24,7 +24,6 @@ class CsvExportController < ApplicationController
         "age_76_plus"
       ]
 
-      # Preload aggregated age groups from new_personas
       age_data = NewPersona
         .where("dane_code_anm LIKE ?", "#{dept_code}%")
         .group(:dane_code_anm)
@@ -99,7 +98,6 @@ class CsvExportController < ApplicationController
         "age_76_plus"
       ]
 
-      # ✅ Preload aggregated age groups from new_personas using `new_age_group`
       age_data = NewPersona
         .where("dane_code_anm LIKE ?", "#{dept_code}%")
         .group(:dane_code_anm)
@@ -115,10 +113,8 @@ class CsvExportController < ApplicationController
           "SUM(CASE WHEN new_age_group IN (16,17,18,19,20,21) THEN 1 ELSE 0 END) AS age_76_plus"
         )
 
-      # Convert results to a hash for fast lookup by dane_code_anm
       age_lookup = age_data.index_by(&:dane_code_anm)
 
-      # Export FundamentalIndicator records
       FundamentalIndicator.where("dane_code LIKE ?", "#{dept_code}%")
                           .find_each(batch_size: 5000) do |record|
         ethnic = record.ethnic_group_population || {}
@@ -148,7 +144,7 @@ class CsvExportController < ApplicationController
       end
     end
 
-    puts "✅ Exported department #{dept_code} → #{file_path}"
+    puts "Exported department #{dept_code} → #{file_path}"
   end
 
 end

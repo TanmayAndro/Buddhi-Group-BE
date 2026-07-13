@@ -58,7 +58,6 @@ class HogaresController < ApplicationController
           end
         end
 
-        # Insert remaining rows
         NewHogare.insert_all(hogares) if hogares.any?
       end
 

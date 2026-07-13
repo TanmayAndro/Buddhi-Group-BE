@@ -5,11 +5,10 @@ class ElectoralRollsController < ApplicationController
     file = params[:file]
     return render(json: { error: "No file uploaded" }, status: :bad_request) unless file.present?
 
-    # Open XLSX file with Roo
     xlsx  = Roo::Spreadsheet.open(file.path)
-    sheet = xlsx.sheet(0) # use first sheet
+    sheet = xlsx.sheet(0)
 
-    headers       = sheet.row(1).map(&:to_s) # first row = headers
+    headers       = sheet.row(1).map(&:to_s)
     inserted_rows = 0
 
     (2..sheet.last_row).each do |i|
@@ -71,10 +70,10 @@ class ElectoralRollsController < ApplicationController
         election_year:                                   row["ELECTION_YEAR"],
         election_type:                                   row["ELECTION_TYPE"],
         department_name:                                 row["DEP_NAME"],
-        municipality_name:                               row["MUN_NAME"], # second DEP_NAME in your file
+        municipality_name:                               row["MUN_NAME"],
         polling_station_name:                            row["POLLING_NAME"],
         district:                                        row["DISTRIC"],
-        district_code:                                   row["DISTRIC_CODE"], # if you have a separate code, replace it
+        district_code:                                   row["DISTRIC_CODE"],
         latitude:                                        row["LAT"],
         longitude:                                       row["LONG"],
         is_mayor_elected_at_this_station:                row["MAYOR"],
@@ -93,7 +92,7 @@ class ElectoralRollsController < ApplicationController
 
   def update_polling_station_name_from_electoral_roll
     year = 2018
-    puts "🗳️ Updating polling_station_name for election_year #{year}..."
+    puts "Updating polling_station_name for election_year #{year}..."
 
     sql = <<-SQL
       UPDATE votes
@@ -109,11 +108,11 @@ class ElectoralRollsController < ApplicationController
     SQL
 
     result = ActiveRecord::Base.connection.execute(sql)
-    puts "✅ Done! Updated polling_station_name for #{year}"
+    puts "Done! Updated polling_station_name for #{year}"
   end
   
   def generate_new_polling_id_fast
-    puts "🚀 Updating new_polling_id using a single SQL query..."
+    puts "Updating new_polling_id using a single SQL query..."
 
     ActiveRecord::Base.connection.execute(<<~SQL)
       UPDATE new_votes
@@ -127,6 +126,6 @@ class ElectoralRollsController < ApplicationController
       WHERE polling_station_name IS NOT NULL;
     SQL
 
-    puts "✅ Completed super-fast update!"
+    puts "Completed super-fast update!"
   end
 end

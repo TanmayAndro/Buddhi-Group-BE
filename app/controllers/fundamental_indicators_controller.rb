@@ -1,7 +1,7 @@
 class FundamentalIndicatorsController < ApplicationController
   def calculate_all
     CalculateAllIndicatorsJob.perform_later
-    render json: { message: "📊 Indicator calculation job has been enqueued." }, status: :accepted
+    render json: { message: "Indicator calculation job has been enqueued." }, status: :accepted
   end
 	
 

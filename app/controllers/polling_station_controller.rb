@@ -1,6 +1,6 @@
 class PollingStationController < ApplicationController
   def update_department_code
-    puts "🚀 Efficiently updating department_code in polling_stations..."
+    puts "Efficiently updating department_code in polling_stations..."
 
     departments = Vote.distinct.pluck(:department_name, :department_code)
 
@@ -8,10 +8,10 @@ class PollingStationController < ApplicationController
       PollingStation.where(department_name: dept_name)
                     .update_all(department_code: dept_code)
 
-      puts "✅ (#{index + 1}/#{departments.size}) Updated: #{dept_name}"
+      puts "(#{index + 1}/#{departments.size}) Updated: #{dept_name}"
     end
 
-    puts "🎯 Completed updating department_code for #{departments.size} departments!"
+    puts "Completed updating department_code for #{departments.size} departments!"
   end
 
   def update_municipality_code
@@ -23,9 +23,9 @@ class PollingStationController < ApplicationController
       PollingStation.where(municipality_name: muni_name)
                     .update_all(municipality_code: muni_code)
 
-      puts "✅ (#{index + 1}/#{municipalities.size}) Updated: #{muni_name}"
+      puts "(#{index + 1}/#{municipalities.size}) Updated: #{muni_name}"
     end
 
-    puts "🎯 Completed updating municipality_code for #{municipalities.size} municipalities!"
+    puts "Completed updating municipality_code for #{municipalities.size} municipalities!"
   end
 end

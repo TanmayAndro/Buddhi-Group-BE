@@ -110,6 +110,4 @@ Rails.application.routes.draw do
   post '/crime_type_by_department', to: 'crimes#crime_type_by_department'
   post '/crime_type_by_months', to: 'crimes#crime_type_by_months'
   post '/crime_type_by_municipalities', to: 'crimes#crime_type_by_municipalities'
-
-
 end

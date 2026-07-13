@@ -25,13 +25,11 @@ class MarcoDeGeorreferenciacionsController < ApplicationController
           urban_sector       = row['U_SECT_URB']
           urban_section      = row['U_SECC_URB']
           block              = row['U_MZA']
-          encuesta_code      = row['COD_ENCUESTAS']  # add this into database as well 
-          vivienda_code      = row['U_VIVIENDA'].to_s.rjust(3, '0') # add this into database as well
+          encuesta_code      = row['COD_ENCUESTAS']   
+          vivienda_code      = row['U_VIVIENDA'].to_s.rjust(3, '0')
 
-          # Derived column
           common_key = "#{encuesta_code}#{vivienda_code}".to_i
 
-          # Build row
           marco_de_georreferenciacions << {
             department_code: department_code,
             muncipality_code: muncipality_code,

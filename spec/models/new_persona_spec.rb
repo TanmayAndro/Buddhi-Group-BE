@@ -1,4 +1,3 @@
-# spec/models/new_persona_spec.rb
 require 'rails_helper'
 
 RSpec.describe NewPersona, type: :model do
@@ -34,9 +33,9 @@ RSpec.describe NewPersona, type: :model do
       end
 
       puts "\n--- Dane Code Verification Report ---"
-      puts "✅ Matched: #{matched}"
-      puts "❌ Not matched: #{mismatches_count}"
-      puts "📊 Total checked: #{total}"
+      puts "Matched: #{matched}"
+      puts "Not matched: #{mismatches_count}"
+      puts "Total checked: #{total}"
       if mismatches_sample.any?
         puts "\nSample mismatches:"
         mismatches_sample.each do |m|
@@ -44,7 +43,7 @@ RSpec.describe NewPersona, type: :model do
         end
       end
 
-      expect(mismatches_count).to eq(0), "❌ #{mismatches_count} records have mismatched dane_code_anm"
+      expect(mismatches_count).to eq(0), "#{mismatches_count} records have mismatched dane_code_anm"
     end
   end
 end

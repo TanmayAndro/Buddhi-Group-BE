@@ -1,3 +1,3 @@
 class TerritorialidadEtnica < ApplicationRecord
-    self.table_name = :territorialidad_etnicas
+	self.table_name = :territorialidad_etnicas
 end

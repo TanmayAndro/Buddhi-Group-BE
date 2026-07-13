@@ -68,7 +68,6 @@ class NewMarcoDeGeorreferenciacionsController < ApplicationController
     updated_count = 0
     unmatched = []
 
-    # Loop through all rows after headers (skip first 3)
     sheet.each_row_streaming(offset: 3) do |row|
       dept_code = row[0]&.cell_value.to_s.strip
       dept_name = row[1]&.cell_value.to_s.strip

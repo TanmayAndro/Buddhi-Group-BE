@@ -44,7 +44,7 @@ RSpec.describe FundamentalIndicator, type: :model do
         dane_code = indicator.dane_code
         aggregated = persona_agg[dane_code]
 
-        next unless aggregated # skip if no data in NewPersona
+        next unless aggregated
         total_checked += 1
 
         if indicator.slice(

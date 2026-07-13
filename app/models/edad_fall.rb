@@ -1,3 +1,3 @@
 class EdadFall < ApplicationRecord
-    self.table_name = :edad_falls
+	self.table_name = :edad_falls
 end

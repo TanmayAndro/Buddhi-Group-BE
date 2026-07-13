@@ -25,7 +25,7 @@ RSpec.describe ElectoralRoll, type: :model do
           matched += 1
         else
           mismatched += 1
-          puts "\n❌ MISMATCH for ElectoralRoll id=#{roll.id}"
+          puts "\n MISMATCH for ElectoralRoll id=#{roll.id}"
           puts "Expected: #{expected_id}"
           puts "Actual:   #{roll.nov_polling_id}"
           puts "Original Name:     #{roll.polling_station_name}"
@@ -38,8 +38,8 @@ RSpec.describe ElectoralRoll, type: :model do
       end
 
       puts "\n=========== SUMMARY ==========="
-      puts "✅ Total matched:    #{matched}"
-      puts "❌ Total mismatched: #{mismatched}"
+      puts "Total matched:    #{matched}"
+      puts "Total mismatched: #{mismatched}"
       puts "================================\n"
 
       expect(mismatched).to eq(0), "There are #{mismatched} mismatched nov_polling_id records. Check console output above."
@@ -80,7 +80,7 @@ RSpec.describe ElectoralRoll, type: :model do
         else
           invalid_count += 1
 
-          puts "\n❌ Invalid first 7 digits for ElectoralRoll id=#{roll.id}"
+          puts "\n Invalid first 7 digits for ElectoralRoll id=#{roll.id}"
           puts "nov_polling_id: #{roll.nov_polling_id}"
           puts "First 7 chars:  #{first_seven}"
           puts "-----------------------------------------------"
@@ -88,8 +88,8 @@ RSpec.describe ElectoralRoll, type: :model do
       end
 
       puts "\n=========== FIRST 7 DIGITS SUMMARY ==========="
-      puts "✅ Valid first 7 digits:    #{valid_count}"
-      puts "❌ Invalid first 7 digits:  #{invalid_count}"
+      puts "Valid first 7 digits:    #{valid_count}"
+      puts "Invalid first 7 digits:  #{invalid_count}"
       puts "==============================================\n"
 
       expect(true).to eq(true)
@@ -115,7 +115,7 @@ RSpec.describe ElectoralRoll, type: :model do
           if districts.size > 1 || names.size > 1
             total_inconsistent += 1
 
-            puts "\n❌ Year #{year} – mismatch for nov_polling_id #{nov_polling_id}"
+            puts "\n Year #{year} – mismatch for nov_polling_id #{nov_polling_id}"
             puts "Districts: #{districts.inspect}"
             puts "Polling Station Names: #{names.inspect}"
             puts "------------------------------------------"
@@ -154,10 +154,10 @@ RSpec.describe ElectoralRoll, type: :model do
         if inconsistent.any?
           total_inconsistent += inconsistent.size
 
-          puts "\n❌ Inconsistent nov_polling_id found for election_year #{year}:"
+          puts "\n Inconsistent nov_polling_id found for election_year #{year}:"
           inconsistent.each { |id| puts " - #{id}" }
         else
-          puts "✅ No inconsistencies found for year #{year}"
+          puts "No inconsistencies found for year #{year}"
         end
       end
 
@@ -169,5 +169,4 @@ RSpec.describe ElectoralRoll, type: :model do
         "Found #{total_inconsistent} nov_polling_id with mismatched district/address/name across years"
     end
   end
-
 end

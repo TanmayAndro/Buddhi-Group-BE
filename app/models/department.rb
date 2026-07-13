@@ -1,3 +1,3 @@
 class Department < ApplicationRecord
-    has_many :municipalities
+	has_many :municipalities
 end

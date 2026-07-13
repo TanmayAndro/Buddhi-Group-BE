@@ -27,7 +27,7 @@ RSpec.describe NewVote, type: :model do
         else
           mismatched += 1
 
-          puts "\n❌ MISMATCH for NewVote id=#{vote.id}"
+          puts "\n MISMATCH for NewVote id=#{vote.id}"
           puts "Expected: #{expected_id}"
           puts "Actual:   #{vote.new_polling_id}"
           puts "Original Name:     #{vote.polling_station_name}"
@@ -40,8 +40,8 @@ RSpec.describe NewVote, type: :model do
       end
 
       puts "\n=========== SUMMARY ==========="
-      puts "✅ Total matched:    #{matched}"
-      puts "❌ Total mismatched: #{mismatched}"
+      puts " Total matched:    #{matched}"
+      puts " Total mismatched: #{mismatched}"
       puts "================================\n"
 
       expect(mismatched).to eq(0), "There are #{mismatched} mismatched new_polling_id records. Check console output above."
@@ -63,7 +63,7 @@ RSpec.describe NewVote, type: :model do
         else
           invalid_count += 1
 
-          puts "\n❌ Invalid first 7 digits for NewVote id=#{vote.id}"
+          puts "\n Invalid first 7 digits for NewVote id=#{vote.id}"
           puts "new_polling_id: #{vote.new_polling_id}"
           puts "First 7 chars:  #{first_seven}"
           puts "-----------------------------------------------"
@@ -71,8 +71,8 @@ RSpec.describe NewVote, type: :model do
       end
 
       puts "\n=========== FIRST 7 DIGITS SUMMARY ==========="
-      puts "✅ Valid first 7 digits:    #{valid_count}"
-      puts "❌ Invalid first 7 digits:  #{invalid_count}"
+      puts "Valid first 7 digits:    #{valid_count}"
+      puts "Invalid first 7 digits:  #{invalid_count}"
       puts "==============================================\n"
 
       expect(true).to eq(true)
@@ -129,7 +129,7 @@ RSpec.describe NewVote, type: :model do
 
       puts "\n=========== POLLING ID ADDRESS & NAME INCONSISTENCIES =========="
       inconsistencies.each do |i|
-        puts "\n❌ polling_id = #{i[:polling_id]} (#{i[:count]} records):"
+        puts "\n polling_id = #{i[:polling_id]} (#{i[:count]} records):"
         puts "Districts: #{i[:districts].inspect}"
         puts "Addresses: #{i[:addresses].inspect}"
         puts "Names:     #{i[:names].inspect}"
